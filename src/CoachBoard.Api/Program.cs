@@ -152,7 +152,7 @@ builder.Services.AddSwaggerGen(c =>
     c.CustomOperationIds(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{apiDesc.HttpMethod}");
 });
 
-
+// Rate limiting básico
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("fixed", opt =>
