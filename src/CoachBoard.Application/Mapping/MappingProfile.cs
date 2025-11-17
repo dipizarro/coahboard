@@ -1,0 +1,37 @@
+﻿using AutoMapper;
+using CoachBoard.Application.DTOs;
+using CoachBoard.Domain.Entities;
+
+namespace CoachBoard.Application.Mapping;
+
+public class MappingProfile : Profile
+{
+    public MappingProfile()
+    {
+        CreateMap<CoachCreateDto, Coach>();
+        CreateMap<CoachUpdateDto, Coach>();
+        CreateMap<Coach, CoachReadDto>();
+
+        CreateMap<ClientCreateDto, Client>();
+        CreateMap<ClientUpdateDto, Client>();
+        CreateMap<Client, ClientReadDto>();
+
+        // Exercises
+        CreateMap<ExerciseCreateDto, Exercise>();
+        CreateMap<ExerciseUpdateDto, Exercise>();
+        CreateMap<Exercise, ExerciseReadDto>();
+
+        // Routines
+        CreateMap<RoutineCreateDto, Routine>();
+        CreateMap<RoutineUpdateDto, Routine>();
+
+        // RoutineExercise <-> DTOs
+        CreateMap<RoutineItemDto, RoutineExercise>();
+        CreateMap<RoutineExercise, RoutineReadItemDto>()
+            .ForMember(d => d.ExerciseName, m => m.MapFrom(s => s.Exercise.Name))
+            .ForMember(d => d.Category, m => m.MapFrom(s => s.Exercise.Category));
+
+        CreateMap<Routine, RoutineReadDto>()
+            .ForMember(d => d.Items, m => m.MapFrom(s => s.RoutineExercises.OrderBy(x => x.Order)));
+    }
+}

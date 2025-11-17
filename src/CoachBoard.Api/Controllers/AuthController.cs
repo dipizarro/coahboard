@@ -1,0 +1,95 @@
+﻿using BCrypt.Net;
+using CoachBoard.Application.DTOs;
+using CoachBoard.Application.Interfaces;
+using CoachBoard.Domain.Entities;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.RateLimiting;
+
+namespace CoachBoard.Api.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class AuthController : ControllerBase
+{
+    private readonly IUserRepository _users;
+    private readonly ICoachRepository _coaches;
+    private readonly IJwtService _jwt;
+
+    public AuthController(IUserRepository users, ICoachRepository coaches, IJwtService jwt)
+    {
+        _users = users;
+        _coaches = coaches;
+        _jwt = jwt;
+    }
+
+    [HttpPost("register")]
+    [EnableRateLimiting("fixed")]
+    public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
+    {
+        var existing = await _users.GetByEmailAsync(req.Email.Trim().ToLower());
+        if (existing is not null) return Conflict("Email ya registrado.");
+
+        var normalizedEmail = req.Email.Trim().ToLower();
+        var role = string.IsNullOrWhiteSpace(req.Role) ? "Coach" : req.Role.Trim();
+
+        var user = new User
+        {
+            Email = normalizedEmail,
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
+            Role = role
+        };
+
+        await _users.AddAsync(user);
+        await _users.SaveChangesAsync();
+
+        int? coachId = null;
+
+        if (role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
+        {
+            var name = string.IsNullOrWhiteSpace(req.Name)
+                ? normalizedEmail.Split('@')[0]
+                : req.Name.Trim();
+
+            var specialty = string.IsNullOrWhiteSpace(req.Specialty)
+                ? "General"
+                : req.Specialty.Trim();
+
+            var coach = new Coach
+            {
+                UserId = user.Id,
+                Name = name,
+                Specialty = specialty
+            };
+
+            await _coaches.AddAsync(coach);
+            await _coaches.SaveChangesAsync();
+
+            coachId = coach.Id;
+        }
+
+        var token = _jwt.GenerateToken(user.Email, user.Role, coachId);
+        return Ok(new AuthResponse(token, user.Email, user.Role, coachId));
+    }
+
+    [HttpPost("login")]
+    [EnableRateLimiting("fixed")]
+    public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req)
+    {
+        var normalizedEmail = req.Email.Trim().ToLower();
+        var user = await _users.GetByEmailAsync(normalizedEmail);
+        if (user is null) return Unauthorized("Credenciales inválidas.");
+
+        var ok = BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);
+        if (!ok) return Unauthorized("Credenciales inválidas.");
+
+        int? coachId = null;
+        if (user.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
+        {
+            var coach = await _coaches.GetByUserIdAsync(user.Id);
+            coachId = coach?.Id;
+        }
+
+        var token = _jwt.GenerateToken(user.Email, user.Role, coachId);
+        return Ok(new AuthResponse(token, user.Email, user.Role, coachId));
+    }
+}

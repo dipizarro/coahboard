@@ -1,0 +1,25 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+.vs/
+
+# Logs
+logs/
+*.log
+
+# Configs locales / secretos
+appsettings.*.Local.json
+appsettings.Local.json
+
+# Node / frontend (cuando exista)
+node_modules/
+dist/
+build/
+
+# Sistema
+Thumbs.db
+.DS_Store
+.env
+.env.local
