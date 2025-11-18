@@ -1,15 +1,31 @@
 import { api } from './client'
 
-export type LoginResponse = {
+export type AuthResponse = {
   token: string
   email: string
   role: 'Admin' | 'Coach' | 'User' | string
+  coachId?: number | null
 }
 
-export async function login(email: string, password: string): Promise<LoginResponse> {
-  const { data } = await api.post('/api/Auth/login', { email, password })
+// Login normal
+export async function login(email: string, password: string): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>('/api/Auth/login', { email, password })
   return data
 }
 
-// Si más adelante agregas /auth/me, lo reponemos.
-// export async function me() { ... }
+// Payload para registro de Coach
+export type RegisterPayload = {
+  email: string
+  password: string
+  name?: string
+  specialty?: string
+}
+
+// Registro SIEMPRE como Coach (no permitimos Admin desde la app)
+export async function register(payload: RegisterPayload): Promise<AuthResponse> {
+  const { data } = await api.post<AuthResponse>('/api/Auth/register', {
+    ...payload,
+    role: 'Coach', // <- hardcodeado
+  })
+  return data
+}

@@ -1,9 +1,9 @@
 import { Navigate, useLocation } from 'react-router-dom'
-import { useAuthCtx } from '../auth/AuthContext'
+import { useAuth } from '../auth/useAuth'
 
 
 export default function Protected({ children }: { children: React.ReactNode }) {
-const { token } = useAuthCtx()
+const { token } = useAuth()
 const location = useLocation()
 if (!token) return <Navigate to="/login" state={{ from: location }} replace />
 return <>{children}</>

@@ -1,73 +1,72 @@
-# React + TypeScript + Vite
+# CoachBoard Web (Frontend)
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+Aplicación web creada con React, TypeScript y Vite para administrar atletas y dashboards de entrenadores en CoachBoard.
 
-Currently, two official plugins are available:
+## Requisitos
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+- Node.js ≥ 20
+- npm ≥ 10
+- Backend de CoachBoard en ejecución (ver carpeta `src/` del monorepo o el API desplegado).
 
-## React Compiler
+## Configuración rápida
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+1. Instalar dependencias:
+   ```bash
+   npm install
+   ```
+2. Crear un archivo `.env` en la raíz del proyecto basándose en `env.example`.
+3. Ejecutar el entorno de desarrollo:
+   ```bash
+   npm run dev
+   ```
+4. Abrir `http://localhost:5173` en el navegador.
 
-## Expanding the ESLint configuration
+## Variables de entorno
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+| Nombre          | Descripción                                              | Valor por defecto |
+|-----------------|----------------------------------------------------------|-------------------|
+| `VITE_API_URL`  | URL base del backend CoachBoard (incluye protocolo/host) | `http://localhost:5152` |
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+Ejemplo (`.env`):
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```
+VITE_API_URL=http://localhost:5152
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+La API debe exponer los endpoints `POST /api/Auth/login`, `POST /api/Auth/register` y el CRUD de clientes/atletas bajo `/api/Clients`.
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+## Scripts npm
 
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
+| Script          | Descripción                                             |
+|-----------------|---------------------------------------------------------|
+| `npm run dev`   | Levanta Vite con HMR.                                   |
+| `npm run build` | Compila TypeScript y genera artefactos de producción.   |
+| `npm run preview` | Sirve el build localmente para pruebas.               |
+| `npm run lint`  | Ejecuta ESLint sobre todo el código fuente.             |
+
+## Estructura relevante
+
+- `src/app`: Router, layout y protección de rutas.
+- `src/auth`: Contexto de autenticación y hooks (JWT).
+- `src/api`: Cliente Axios y módulos por recurso.
+- `src/pages`: Páginas React (login, dashboard, atletas, etc.).
+- `src/components`: Componentes reutilizables (navbar, sidebar, tablas).
+- `src/lib`: Tipos compartidos y utilidades (storage, helpers).
+
+## Flujo de autenticación
+
+1. `AuthContext` maneja `login/logout`, persistiendo `token` y `user` en `localStorage`.
+2. `api/client.ts` añade el header `Authorization: Bearer <token>` en cada request.
+3. Las rutas privadas se envuelven con `Protected`, que redirige a `/login` cuando no hay sesión activa.
+
+## Conexión con el backend
+
+- Asegúrate de que el backend tenga habilitado CORS para el origen del frontend.
+- El usuario puede registrarse sólo como `Coach`; los roles `Admin` se gestionan desde el backend.
+- Para datos reales, inicia sesión con una cuenta existente o crea una nueva desde `/register`.
+
+## Próximos pasos (roadmap módulo 3)
+
+- Finalizar componentes reutilizables (tablas, estados vacíos, loaders).
+- Mejorar la experiencia responsive en navbar/sidebar.
+- Añadir métricas accionables en el dashboard y completar el CRUD de atletas (búsquedas, filtros, validaciones).

@@ -1,25 +1,35 @@
+// src/api/client.ts
 import axios from 'axios'
 import { storage } from '../lib/storage'
 
-
-export const api = axios.create({ baseURL: import.meta.env.VITE_API_BASE_URL })
-
-
-api.interceptors.request.use((config) => {
-const token = storage.get('token')
-if (token) config.headers.Authorization = `Bearer ${token}`
-return config
+export const api = axios.create({
+  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5152',
 })
 
+const STORAGE_TOKEN_KEY = 'coachboard_token' // MISMA que en AuthContext
+
+type UnauthorizedHandler = () => void
+let unauthorizedHandler: UnauthorizedHandler | null = null
+
+export function setUnauthorizedHandler(handler: UnauthorizedHandler | null) {
+  unauthorizedHandler = handler
+}
+
+api.interceptors.request.use(config => {
+  const token = storage.get(STORAGE_TOKEN_KEY)
+  if (token) {
+    config.headers = config.headers ?? {}
+    config.headers.Authorization = `Bearer ${token}`
+  }
+  return config
+})
 
 api.interceptors.response.use(
-(r) => r,
-(err) => {
-if (err.response?.status === 401) {
-// opcional: redirigir a login
-storage.del('token')
-window.location.href = '/login'
-}
-return Promise.reject(err)
-}
+  response => response,
+  error => {
+    if (error?.response?.status === 401 && typeof unauthorizedHandler === 'function') {
+      unauthorizedHandler()
+    }
+    return Promise.reject(error)
+  },
 )
