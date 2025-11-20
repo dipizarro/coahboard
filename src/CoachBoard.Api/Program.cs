@@ -1,5 +1,6 @@
 // Middlewares (si tienes el de excepciones)
 using CoachBoard.Api.Extensions;
+using CoachBoard.Api.Services;
 using CoachBoard.API.Middlewares;
 // Repositorios / App
 using CoachBoard.Application.Interfaces;
@@ -69,7 +70,7 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseRepository
                            CoachBoard.Infrastructure.Repositories.ExerciseRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,
                            CoachBoard.Infrastructure.Repositories.RoutineRepository>();
-
+builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 
 
 // ------------ ModelState -> ProblemDetails (opcional, pero útil) ------------
@@ -163,6 +164,9 @@ builder.Services.AddRateLimiter(options =>
         opt.QueueLimit = 0;
     });
 });
+
+builder.Services.AddHttpContextAccessor();
+builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 

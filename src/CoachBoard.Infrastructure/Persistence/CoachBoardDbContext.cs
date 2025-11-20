@@ -13,6 +13,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<Exercise> Exercises => Set<Exercise>();
     public DbSet<Routine> Routines => Set<Routine>();
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
+    public DbSet<Session> Sessions => Set<Session>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -95,6 +96,46 @@ public class CoachBoardDbContext : DbContext
             e.Property(x => x.Sets).IsRequired();
             e.Property(x => x.Reps).IsRequired();
             e.Property(x => x.Order).IsRequired();
+        });
+
+        modelBuilder.Entity<Session>(e =>
+        {
+            e.ToTable("Sessions");
+            e.HasKey(x => x.Id);
+
+            e.Property(x => x.StartAt).IsRequired();
+            e.Property(x => x.EndAt).IsRequired();
+
+            e.Property(x => x.Status)
+                .IsRequired()
+                .HasMaxLength(30);
+
+            e.Property(x => x.Type)
+                .IsRequired()
+                .HasMaxLength(30);
+
+            e.Property(x => x.Location)
+                .HasMaxLength(150);
+
+            e.Property(x => x.Notes)
+                .HasMaxLength(500);
+
+            e.HasOne(x => x.Coach)
+                .WithMany(c => c.Sessions)
+                .HasForeignKey(x => x.CoachId)
+                .OnDelete(DeleteBehavior.Restrict);   // ⬅ ya lo tenías NO ACTION
+
+            e.HasOne(x => x.Client)
+                .WithMany(c => c.Sessions)
+                .HasForeignKey(x => x.ClientId)
+                .OnDelete(DeleteBehavior.Restrict);   // ⬅ CAMBIAR SetNull → Restrict
+
+            e.HasOne(x => x.Routine)
+                .WithMany(r => r.Sessions)
+                .HasForeignKey(x => x.RoutineId)
+                .OnDelete(DeleteBehavior.Restrict);   // ⬅ CAMBIAR SetNull → Restrict
+
+            e.HasIndex(x => new { x.CoachId, x.StartAt });
         });
 
 

@@ -33,5 +33,18 @@ public class MappingProfile : Profile
 
         CreateMap<Routine, RoutineReadDto>()
             .ForMember(d => d.Items, m => m.MapFrom(s => s.RoutineExercises.OrderBy(x => x.Order)));
+
+        // Sessions
+        CreateMap<SessionCreateDto, Session>()
+            .ForMember(d => d.Status, m => m.MapFrom(_ => "Planned"))
+            .ForMember(d => d.CoachId, m => m.Ignore()); // se setea en el controller según el usuario
+
+        CreateMap<SessionUpdateDto, Session>()
+            .ForMember(d => d.CoachId, m => m.Ignore())  // nunca se cambia el coach desde aquí
+            .ForMember(d => d.CreatedAt, m => m.Ignore()); // no tocamos CreatedAt
+
+        CreateMap<Session, SessionReadDto>()
+            .ForMember(d => d.ClientName, m => m.MapFrom(s => s.Client != null ? s.Client.FullName : null))
+            .ForMember(d => d.RoutineTitle, m => m.MapFrom(s => s.Routine != null ? s.Routine.Title : null));
     }
 }

@@ -172,6 +172,61 @@ namespace CoachBoard.Infrastructure.Persistence.Migrations
                     b.ToTable("RoutineExercises", (string)null);
                 });
 
+            modelBuilder.Entity("CoachBoard.Domain.Entities.Session", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("ClientId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("CoachId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("EndAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Location")
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<int?>("RoutineId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("StartAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ClientId");
+
+                    b.HasIndex("RoutineId");
+
+                    b.HasIndex("CoachId", "StartAt");
+
+                    b.ToTable("Sessions", (string)null);
+                });
+
             modelBuilder.Entity("CoachBoard.Domain.Entities.User", b =>
                 {
                     b.Property<int>("Id")
@@ -256,14 +311,43 @@ namespace CoachBoard.Infrastructure.Persistence.Migrations
                     b.Navigation("Routine");
                 });
 
+            modelBuilder.Entity("CoachBoard.Domain.Entities.Session", b =>
+                {
+                    b.HasOne("CoachBoard.Domain.Entities.Client", "Client")
+                        .WithMany("Sessions")
+                        .HasForeignKey("ClientId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("CoachBoard.Domain.Entities.Coach", "Coach")
+                        .WithMany("Sessions")
+                        .HasForeignKey("CoachId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CoachBoard.Domain.Entities.Routine", "Routine")
+                        .WithMany("Sessions")
+                        .HasForeignKey("RoutineId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Client");
+
+                    b.Navigation("Coach");
+
+                    b.Navigation("Routine");
+                });
+
             modelBuilder.Entity("CoachBoard.Domain.Entities.Client", b =>
                 {
                     b.Navigation("Routines");
+
+                    b.Navigation("Sessions");
                 });
 
             modelBuilder.Entity("CoachBoard.Domain.Entities.Coach", b =>
                 {
                     b.Navigation("Clients");
+
+                    b.Navigation("Sessions");
                 });
 
             modelBuilder.Entity("CoachBoard.Domain.Entities.Exercise", b =>
@@ -274,6 +358,8 @@ namespace CoachBoard.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CoachBoard.Domain.Entities.Routine", b =>
                 {
                     b.Navigation("RoutineExercises");
+
+                    b.Navigation("Sessions");
                 });
 #pragma warning restore 612, 618
         }

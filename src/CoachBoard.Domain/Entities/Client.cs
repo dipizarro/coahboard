@@ -10,4 +10,5 @@ public class Client
     public Coach Coach { get; set; } = null!;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Routine> Routines { get; set; }
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
 }

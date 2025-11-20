@@ -9,4 +9,6 @@ public class Coach
     public string Specialty { get; set; } = "General";
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Client> Clients { get; set; }
+    public ICollection<Session> Sessions { get; set; } = new List<Session>();
+
 }
