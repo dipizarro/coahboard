@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { list as listAthletes } from '../api/athletes'
 import { list as listRoutines } from '../api/routines'
 import { search as searchExercises } from '../api/exercises'
+import { list as listSessions } from '../api/sessions'
 import { useAuth } from '../auth/useAuth'
-import type { Athlete, Routine } from '../lib/types'
+import type { Athlete, Routine, Session } from '../lib/types'
 import Loader from '../components/Loader'
 
 type DashboardStats = {
@@ -12,6 +13,7 @@ type DashboardStats = {
   routinesCount: number
   exercisesCount: number
   recentAthletes: Athlete[]
+  upcomingSessions: Session[]
 }
 
 export default function Dashboard() {
@@ -32,15 +34,20 @@ export default function Dashboard() {
         setError(null)
 
         // Cargar estadísticas en paralelo
-        const [athletesResult, exercisesResult] = await Promise.all([
+        const today = new Date()
+        const nextWeek = new Date(today)
+        nextWeek.setDate(today.getDate() + 7)
+
+        const [athletesResult, exercisesResult, sessionsResult] = await Promise.all([
           listAthletes({ page: 1, pageSize: 5, coachId }), // Solo necesitamos los primeros 5 para "recientes"
           searchExercises({ page: 1, pageSize: 1 }), // Solo necesitamos el total
+          listSessions({ coachId, from: today.toISOString(), to: nextWeek.toISOString() })
         ])
 
         // Obtener rutinas de todos los atletas (limitado a los primeros 5 atletas para no sobrecargar)
         let totalRoutines = 0
         const athleteIds = athletesResult.items.slice(0, 5).map(a => Number(a.id))
-        
+
         if (athleteIds.length > 0) {
           const routinePromises = athleteIds.map(athleteId =>
             listRoutines({ clientId: athleteId, page: 1, pageSize: 1 }).catch(() => null)
@@ -63,6 +70,7 @@ export default function Dashboard() {
           routinesCount: totalRoutines,
           exercisesCount: exercisesResult.total,
           recentAthletes,
+          upcomingSessions: sessionsResult,
         })
       } catch (err) {
         setError('Error al cargar estadísticas del dashboard')
@@ -257,6 +265,44 @@ export default function Dashboard() {
           )}
         </div>
 
+        {/* Próximas Sesiones */}
+        <div className="card">
+          <div className="mb-4 flex items-center justify-between">
+            <h2 className="text-lg font-semibold">Próximas Sesiones (7 días)</h2>
+            <Link to="/sessions" className="text-sm text-primary-600 hover:underline">
+              Ver calendario
+            </Link>
+          </div>
+          {stats.upcomingSessions.length === 0 ? (
+            <p className="text-sm text-gray-500">No tienes sesiones programadas para esta semana.</p>
+          ) : (
+            <div className="space-y-3">
+              {stats.upcomingSessions.slice(0, 5).map(session => (
+                <Link
+                  key={session.id}
+                  to={`/sessions/${session.id}`}
+                  className="flex items-center justify-between rounded-lg border p-3 hover:bg-gray-50"
+                >
+                  <div className="flex-1">
+                    <p className="font-medium">
+                      {session.clientName || 'Sin cliente'}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {new Date(session.startAt).toLocaleDateString()} - {new Date(session.startAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </p>
+                  </div>
+                  <div className={`text-xs px-2 py-1 rounded ${session.status === 'Done' ? 'bg-green-100 text-green-800' :
+                      session.status === 'Canceled' ? 'bg-red-100 text-red-800' :
+                        'bg-blue-100 text-blue-800'
+                    }`}>
+                    {session.status}
+                  </div>
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+
         {/* Acciones rápidas */}
         <div className="card">
           <h2 className="mb-4 text-lg font-semibold">Acciones Rápidas</h2>
@@ -278,6 +324,21 @@ export default function Dashboard() {
               <div className="flex-1">
                 <p className="font-medium">Agregar nuevo atleta</p>
                 <p className="text-xs text-gray-500">Registra un nuevo atleta en tu sistema</p>
+              </div>
+            </Link>
+
+            <Link
+              to="/sessions/new"
+              className="flex items-center gap-3 rounded-lg border p-3 transition-colors hover:bg-gray-50"
+            >
+              <div className="rounded-full bg-green-100 p-2">
+                <svg className="h-5 w-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+              </div>
+              <div className="flex-1">
+                <p className="font-medium">Programar sesión</p>
+                <p className="text-xs text-gray-500">Agenda un nuevo entrenamiento</p>
               </div>
             </Link>
 

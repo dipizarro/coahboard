@@ -31,6 +31,9 @@ export default function Sidebar({ onClose }: SidebarProps) {
       <NavLink to="/dashboard" className={active} onClick={onClose}>
         Dashboard
       </NavLink>
+      <NavLink to="/sessions" className={active} onClick={onClose}>
+        Agenda
+      </NavLink>
       <NavLink to="/athletes" className={active} onClick={onClose}>
         Atletas
       </NavLink>

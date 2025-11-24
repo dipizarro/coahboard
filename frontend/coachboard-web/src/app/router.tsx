@@ -8,6 +8,8 @@ import ExercisesList from '../pages/ExercisesList'
 import ExerciseForm from '../pages/ExerciseForm'
 import RoutinesList from '../pages/RoutinesList'
 import RoutineForm from '../pages/RoutineForm'
+import SessionsList from '../pages/SessionsList'
+import SessionForm from '../pages/SessionForm'
 import Protected from './protected'
 import Layout from './layout'
 
@@ -35,6 +37,9 @@ export default function AppRouter() {
         <Route path="/exercises" element={<ExercisesList />} />
         <Route path="/exercises/new" element={<ExerciseForm />} />
         <Route path="/exercises/:id" element={<ExerciseForm />} />
+        <Route path="/sessions" element={<SessionsList />} />
+        <Route path="/sessions/new" element={<SessionForm />} />
+        <Route path="/sessions/:id" element={<SessionForm />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
