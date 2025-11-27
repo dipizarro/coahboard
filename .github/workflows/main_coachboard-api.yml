@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  AZURE_WEBAPP_NAME: coachboard-api   # <-- nombre exacto de tu Web App en Azure
+  AZURE_WEBAPP_NAME: coachboard-api-g4d2a7bpf5age4b0.eastus2-01.azurewebsites.net   # <-- nombre exacto de tu Web App en Azure
   AZURE_WEBAPP_PACKAGE_PATH: ./publish
   DOTNET_VERSION: '9.0.x'
 
