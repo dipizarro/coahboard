@@ -1,45 +1,65 @@
-name: Deploy CoachBoard API to Azure Web App
+# Docs for the Azure Web Apps Deploy action: https://github.com/Azure/webapps-deploy
+# More GitHub Actions for Azure: https://github.com/Azure/actions
+
+name: Build and deploy ASP.Net Core app to Azure Web App - coachboard-api
 
 on:
   push:
     branches:
-      - main  # o la rama que uses
+      - main
   workflow_dispatch:
 
-env:
-  AZURE_WEBAPP_NAME: coachboard-api # <-- nombre exacto de tu Web App en Azure
-  AZURE_WEBAPP_PACKAGE_PATH: ./publish
-  DOTNET_VERSION: '9.0.x'
-
 jobs:
-  build-and-deploy:
+  build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read #This is required for actions/checkout
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-      - name: Setup .NET
+      - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
-          dotnet-version: ${{ env.DOTNET_VERSION }}
+          dotnet-version: '9.x'
 
-      - name: Restore dependencies
-        working-directory: ./src/CoachBoard.Api
-        run: dotnet restore
+      - name: Build with dotnet
+        run: dotnet build --configuration Release
 
-      - name: Build
-        working-directory: ./src/CoachBoard.Api
-        run: dotnet build --configuration Release --no-restore
+      - name: dotnet publish
+        run: dotnet publish -c Release -o ${{env.DOTNET_ROOT}}/myapp
 
-      - name: Publish
-        working-directory: ./src/CoachBoard.Api
-        run: dotnet publish --configuration Release --no-build --output ../../publish
+      - name: Upload artifact for deployment job
+        uses: actions/upload-artifact@v4
+        with:
+          name: .net-app
+          path: ${{env.DOTNET_ROOT}}/myapp
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: build
+    permissions:
+      id-token: write #This is required for requesting the JWT
+      contents: read #This is required for actions/checkout
+
+    steps:
+      - name: Download artifact from build job
+        uses: actions/download-artifact@v4
+        with:
+          name: .net-app
+      
+      - name: Login to Azure
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZUREAPPSERVICE_CLIENTID_140AE6A59A8F4F7CAA3A2586B75FBFE7 }}
+          tenant-id: ${{ secrets.AZUREAPPSERVICE_TENANTID_6AA90F27FE164389B8A244402BEE3D35 }}
+          subscription-id: ${{ secrets.AZUREAPPSERVICE_SUBSCRIPTIONID_D5C1DB2210424EC585AB9D096282E510 }}
 
       - name: Deploy to Azure Web App
+        id: deploy-to-webapp
         uses: azure/webapps-deploy@v3
         with:
-          app-name: ${{ env.AZURE_WEBAPP_NAME }}
-          slot-name: 'production'
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
-          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+          app-name: 'coachboard-api'
+          slot-name: 'Production'
+          package: .
+          
