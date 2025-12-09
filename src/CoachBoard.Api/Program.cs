@@ -170,8 +170,8 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 
 var app = builder.Build();
 
-await app.SeedAdminAsync();
-await app.SeedAsync();
+//await app.SeedAdminAsync();
+//await app.SeedAsync();
 
 app.UseCors(MyCors);
 // ------------ Middleware global de excepciones (si lo tienes) ------------
