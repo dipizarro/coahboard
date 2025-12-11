@@ -5,7 +5,7 @@ import { list as listRoutines } from '../api/routines'
 import { search as searchExercises } from '../api/exercises'
 import { list as listSessions } from '../api/sessions'
 import { useAuth } from '../auth/useAuth'
-import type { Athlete, Routine, Session } from '../lib/types'
+import type { Athlete, Session } from '../lib/types'
 import Loader from '../components/Loader'
 
 type DashboardStats = {
@@ -292,8 +292,8 @@ export default function Dashboard() {
                     </p>
                   </div>
                   <div className={`text-xs px-2 py-1 rounded ${session.status === 'Done' ? 'bg-green-100 text-green-800' :
-                      session.status === 'Canceled' ? 'bg-red-100 text-red-800' :
-                        'bg-blue-100 text-blue-800'
+                    session.status === 'Canceled' ? 'bg-red-100 text-red-800' :
+                      'bg-blue-100 text-blue-800'
                     }`}>
                     {session.status}
                   </div>

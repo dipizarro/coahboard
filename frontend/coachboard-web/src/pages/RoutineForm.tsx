@@ -1,10 +1,10 @@
-import { FormEvent, useEffect, useState } from 'react'
+import { useEffect, useState, type FormEvent } from 'react'
 import { create, get, update } from '../api/routines'
 import { search as searchExercises } from '../api/exercises'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
 import type { Exercise, RoutineItem } from '../lib/types'
-import Loader from '../components/Loader'
+
 
 export default function RoutineForm() {
   const { athleteId, routineId } = useParams<{ athleteId: string; routineId: string }>()
@@ -113,7 +113,7 @@ export default function RoutineForm() {
     const targetIndex = direction === 'up' ? index - 1 : index + 1
     if (targetIndex < 0 || targetIndex >= newItems.length) return
 
-    ;[newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]]
+      ;[newItems[index], newItems[targetIndex]] = [newItems[targetIndex], newItems[index]]
     newItems.forEach((item, i) => {
       item.order = i + 1
     })

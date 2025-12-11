@@ -1,4 +1,4 @@
-import { FormEvent, useState } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useAuth } from '../auth/useAuth'
 import { useLocation, useNavigate } from 'react-router-dom'
 
@@ -33,7 +33,7 @@ export default function Login() {
       <form onSubmit={onSubmit} className="card w-full max-w-md space-y-4">
         <h1 className="text-2xl font-bold">Iniciar sesión</h1>
         {error && <p className="text-sm text-red-600">{error}</p>}
-  
+
         <input
           className="input"
           placeholder="Email"
@@ -47,11 +47,11 @@ export default function Login() {
           value={password}
           onChange={e => setPassword(e.target.value)}
         />
-  
+
         <button className="btn-primary w-full" disabled={loading}>
           {loading ? 'Ingresando…' : 'Entrar'}
         </button>
-  
+
         <p className="text-center text-sm text-gray-500">
           ¿Eres entrenador y aún no tienes cuenta?{' '}
           <a href="/register" className="text-primary-600 hover:underline">
@@ -61,5 +61,5 @@ export default function Login() {
       </form>
     </div>
   )
-  
+
 }

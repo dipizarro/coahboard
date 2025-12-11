@@ -37,11 +37,7 @@ function decodeJwt(token: string): JwtPayload | null {
     const normalized = payload.replace(/-/g, '+').replace(/_/g, '/')
     const padded = normalized.padEnd(normalized.length + (4 - (normalized.length % 4)) % 4, '=')
     const decoded =
-      typeof atob === 'function'
-        ? atob(padded)
-        : typeof Buffer !== 'undefined'
-          ? Buffer.from(padded, 'base64').toString('binary')
-          : ''
+      atob(padded)
     if (!decoded) return null
     return JSON.parse(decoded)
   } catch {

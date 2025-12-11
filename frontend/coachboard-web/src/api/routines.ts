@@ -1,5 +1,5 @@
 import { api } from './client'
-import type { Routine, RoutineItem, PagedResult } from '../lib/types'
+import type { Routine, PagedResult } from '../lib/types'
 
 export async function list(params: {
   clientId: number
