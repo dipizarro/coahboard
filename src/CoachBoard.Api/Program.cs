@@ -139,9 +139,12 @@ var MyCors = "_coachboardCors";
 builder.Services.AddCors(options =>
 {
     options.AddPolicy(MyCors, p =>
-        p.WithOrigins("http://localhost:5173")
-         .AllowAnyHeader()
-         .AllowAnyMethod());
+        p.WithOrigins(
+            "http://localhost:5173", // dev local
+            "https://brave-tree-0a0b0830f.3.azurestaticapps.net" // front en Azure
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod());
 });
 
 builder.Services.AddHealthChecks()
