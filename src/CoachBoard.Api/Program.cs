@@ -42,11 +42,11 @@ builder.Services.AddDbContext<CoachBoardDbContext>(options =>
 builder.Services.AddControllers();
 
 // ------------ FluentValidation (nuevo API, sin obsoletos) ------------
-// Habilita la validaciÛn autom·tica y adapters del lado cliente
+// Habilita la validaci√≥n autom√°tica y adapters del lado cliente
 builder.Services.AddFluentValidationAutoValidation();
 builder.Services.AddFluentValidationClientsideAdapters();
 
-// Registra validators buscando en el ensamblado donde est· CoachCreateDtoValidator
+// Registra validators buscando en el ensamblado donde est√° CoachCreateDtoValidator
 builder.Services.AddValidatorsFromAssemblyContaining<CoachCreateDtoValidator>();
 // (Alternativa equivalente)
 // builder.Services.AddValidatorsFromAssembly(typeof(CoachCreateDtoValidator).Assembly);
@@ -73,7 +73,7 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
 
 
-// ------------ ModelState -> ProblemDetails (opcional, pero ˙til) ------------
+// ------------ ModelState -> ProblemDetails (opcional, pero √∫til) ------------
 builder.Services.Configure<ApiBehaviorOptions>(options =>
 {
     options.InvalidModelStateResponseFactory = context =>
@@ -87,7 +87,7 @@ builder.Services.Configure<ApiBehaviorOptions>(options =>
 
         var problem = new ProblemDetails
         {
-            Title = "Errores de validaciÛn",
+            Title = "Errores de validaci√≥n",
             Status = StatusCodes.Status400BadRequest,
             Detail = "Revisa los campos enviados.",
             Instance = context.HttpContext.Request.Path
@@ -156,7 +156,7 @@ builder.Services.AddSwaggerGen(c =>
     c.CustomOperationIds(apiDesc => $"{apiDesc.ActionDescriptor.RouteValues["controller"]}_{apiDesc.HttpMethod}");
 });
 
-// Rate limiting b·sico
+// Rate limiting b√°sico
 builder.Services.AddRateLimiter(options =>
 {
     options.AddFixedWindowLimiter("fixed", opt =>
@@ -190,7 +190,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 
-app.MapHealthChecks("/health");    // b·sico
+
+public partial class Program
+{
+}
+app.MapHealthChecks("/health");    // b√°sico
 app.MapHealthChecks("/health/db"); // DB
 
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "CoachBoard.Api" }));
