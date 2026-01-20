@@ -191,9 +191,6 @@ app.UseAuthorization();
 app.MapControllers();
 
 
-public partial class Program
-{
-}
 app.MapHealthChecks("/health");    // básico
 app.MapHealthChecks("/health/db"); // DB
 
