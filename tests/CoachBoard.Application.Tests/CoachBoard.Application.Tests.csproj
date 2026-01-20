@@ -22,6 +22,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\CoachBoard.Application\CoachBoard.Application.csproj" />
+    <ProjectReference Include="..\..\src\CoachBoard.Api\CoachBoard.Api.csproj" />
     <ProjectReference Include="..\..\src\CoachBoard.Domain\CoachBoard.Domain.csproj" />
   </ItemGroup>
 
