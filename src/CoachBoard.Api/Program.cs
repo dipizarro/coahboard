@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 // Middlewares (si tienes el de excepciones)
 using CoachBoard.Api.Extensions;
 using CoachBoard.Api.Services;
@@ -23,6 +24,8 @@ using Serilog;
 using System.Reflection;
 using System.Text;
 using System.Threading.RateLimiting;
+
+[assembly: InternalsVisibleTo("CoachBoard.Api.Tests")]
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -197,3 +200,5 @@ app.MapHealthChecks("/health/db"); // DB
 app.MapGet("/health", () => Results.Ok(new { status = "ok", service = "CoachBoard.Api" }));
 
 app.Run();
+
+public partial class Program { }

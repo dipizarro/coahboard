@@ -31,12 +31,25 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
         builder.ConfigureServices(services =>
         {
+            // Remove existing DbContextOptions
             services.RemoveAll<DbContextOptions<CoachBoardDbContext>>();
-            services.AddDbContext<CoachBoardDbContext>(options =>
-            {
-                options.UseInMemoryDatabase(_databaseName);
-            });
+            services.RemoveAll<DbContextOptions>();
+            services.RemoveAll<CoachBoardDbContext>();
+            
+            Console.WriteLine("Removed DbContext services");
 
+            // Create options for InMemory DB
+            var options = new DbContextOptionsBuilder<CoachBoardDbContext>()
+                .UseInMemoryDatabase(_databaseName)
+                .Options;
+
+            // Register options explicitly to bypass checking IConfigureOptions (which would include the Program.cs SQL Server config)
+            services.AddSingleton(options);
+
+            // Register the context using these options
+            services.AddScoped<CoachBoardDbContext>();
+
+            // If we need Seeding, we must do it within a scope
             using var serviceProvider = services.BuildServiceProvider();
             using var scope = serviceProvider.CreateScope();
             var db = scope.ServiceProvider.GetRequiredService<CoachBoardDbContext>();
