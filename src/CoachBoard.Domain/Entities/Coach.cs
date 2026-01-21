@@ -11,4 +11,6 @@ public class Coach
     public ICollection<Client> Clients { get; set; }
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
 
+    public int TenantId { get; set; }
+    public Tenant? Tenant { get; set; }
 }

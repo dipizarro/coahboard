@@ -13,12 +13,14 @@ public class AuthController : ControllerBase
 {
     private readonly IUserRepository _users;
     private readonly ICoachRepository _coaches;
+    private readonly ITenantRepository _tenants;
     private readonly IJwtService _jwt;
 
-    public AuthController(IUserRepository users, ICoachRepository coaches, IJwtService jwt)
+    public AuthController(IUserRepository users, ICoachRepository coaches, ITenantRepository tenants, IJwtService jwt)
     {
         _users = users;
         _coaches = coaches;
+        _tenants = tenants;
         _jwt = jwt;
     }
 
@@ -40,11 +42,19 @@ public class AuthController : ControllerBase
         var normalizedEmail = req.Email.Trim().ToLower();
         var role = string.IsNullOrWhiteSpace(req.Role) ? "Coach" : req.Role.Trim();
 
+        // 1. Create Tenant
+        // For now, tenant name = Coach's name or a default.
+        var tenantName = string.IsNullOrWhiteSpace(req.Name) ? "My Workspace" : $"{req.Name}'s Workspace";
+        var tenant = new Tenant { Name = tenantName };
+        await _tenants.AddAsync(tenant);
+        await _tenants.SaveChangesAsync(); // Get ID
+
         var user = new User
         {
             Email = normalizedEmail,
             PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
-            Role = role
+            Role = role,
+            TenantId = tenant.Id
         };
 
         await _users.AddAsync(user);
@@ -66,7 +76,8 @@ public class AuthController : ControllerBase
             {
                 UserId = user.Id,
                 Name = name,
-                Specialty = specialty
+                Specialty = specialty,
+                TenantId = tenant.Id
             };
 
             await _coaches.AddAsync(coach);

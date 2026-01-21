@@ -74,6 +74,7 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseRepository
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,
                            CoachBoard.Infrastructure.Repositories.RoutineRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();
+builder.Services.AddScoped<ITenantRepository, TenantRepository>();
 
 
 // ------------ ModelState -> ProblemDetails (opcional, pero útil) ------------

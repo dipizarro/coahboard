@@ -7,4 +7,7 @@ public class User
     public string PasswordHash { get; set; } = null!;
     public string Role { get; set; } = "Coach"; // Admin | Coach | Client
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public int TenantId { get; set; }
+    public Tenant? Tenant { get; set; }
 }

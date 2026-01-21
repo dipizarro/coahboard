@@ -9,4 +9,7 @@ public class Routine
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<RoutineExercise> RoutineExercises { get; set; } = new List<RoutineExercise>();
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
+
+    public int TenantId { get; set; }
+    public Tenant? Tenant { get; set; }
 }

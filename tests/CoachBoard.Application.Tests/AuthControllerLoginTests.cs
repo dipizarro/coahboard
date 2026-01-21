@@ -31,6 +31,7 @@ public class AuthControllerLoginTests
 
         var users = new Mock<IUserRepository>();
         var coaches = new Mock<ICoachRepository>();
+        var tenants = new Mock<ITenantRepository>();
         var jwt = new Mock<IJwtService>();
 
         users.Setup(repo => repo.GetByEmailAsync("user@example.com"))
@@ -40,7 +41,7 @@ public class AuthControllerLoginTests
         jwt.Setup(service => service.GenerateToken(user.Email, user.Role, coach.Id))
             .Returns("token-value");
 
-        var controller = new AuthController(users.Object, coaches.Object, jwt.Object);
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
 
         var actionResult = await controller.Login(loginRequest);
 
@@ -72,12 +73,13 @@ public class AuthControllerLoginTests
 
         var users = new Mock<IUserRepository>();
         var coaches = new Mock<ICoachRepository>();
+        var tenants = new Mock<ITenantRepository>();
         var jwt = new Mock<IJwtService>();
 
         users.Setup(repo => repo.GetByEmailAsync("user@example.com"))
             .ReturnsAsync(user);
 
-        var controller = new AuthController(users.Object, coaches.Object, jwt.Object);
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
 
         var actionResult = await controller.Login(loginRequest);
 
@@ -93,12 +95,13 @@ public class AuthControllerLoginTests
 
         var users = new Mock<IUserRepository>();
         var coaches = new Mock<ICoachRepository>();
+        var tenants = new Mock<ITenantRepository>();
         var jwt = new Mock<IJwtService>();
 
         users.Setup(repo => repo.GetByEmailAsync("missing@example.com"))
             .ReturnsAsync((User?)null);
 
-        var controller = new AuthController(users.Object, coaches.Object, jwt.Object);
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
 
         var actionResult = await controller.Login(loginRequest);
 

@@ -26,4 +26,7 @@ public class Session
     public string? Notes { get; set; }
 
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public int TenantId { get; set; }
+    public Tenant? Tenant { get; set; }
 }

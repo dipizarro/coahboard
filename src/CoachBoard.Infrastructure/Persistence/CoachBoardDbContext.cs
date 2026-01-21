@@ -14,10 +14,20 @@ public class CoachBoardDbContext : DbContext
     public DbSet<Routine> Routines => Set<Routine>();
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
     public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<Tenant> Tenants => Set<Tenant>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        // Tenant
+        modelBuilder.Entity<Tenant>(e =>
+        {
+            e.ToTable("Tenants");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).IsRequired().HasMaxLength(150);
+            e.HasData(new Tenant { Id = 1, Name = "Default Tenant", CreatedAt = DateTime.UtcNow });
+        });
+
         modelBuilder.Entity<Coach>(e =>
         {
             e.ToTable("Coaches");
@@ -30,6 +40,9 @@ public class CoachBoardDbContext : DbContext
                 .WithMany() // no definimos colección en User (no es necesario)
                 .HasForeignKey(x => x.UserId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            e.Property(x => x.TenantId).HasDefaultValue(1);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<User>(e =>
@@ -40,6 +53,9 @@ public class CoachBoardDbContext : DbContext
             e.HasIndex(x => x.Email).IsUnique();
             e.Property(x => x.PasswordHash).IsRequired();
             e.Property(x => x.Role).IsRequired().HasMaxLength(30);
+
+            e.Property(x => x.TenantId).HasDefaultValue(1);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
         modelBuilder.Entity<Client>(e =>
@@ -54,6 +70,9 @@ public class CoachBoardDbContext : DbContext
                 .HasForeignKey(x => x.CoachId)
                 .OnDelete(DeleteBehavior.Cascade);
             e.HasIndex(x => new { x.CoachId, x.FullName });
+
+            e.Property(x => x.TenantId).HasDefaultValue(1);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // Exercise
@@ -75,6 +94,9 @@ public class CoachBoardDbContext : DbContext
                 .WithMany(c => c.Routines)
                 .HasForeignKey(x => x.ClientId)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            e.Property(x => x.TenantId).HasDefaultValue(1);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
         // RoutineExercise (join con metadata)
@@ -136,6 +158,9 @@ public class CoachBoardDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);   // ⬅ CAMBIAR SetNull → Restrict
 
             e.HasIndex(x => new { x.CoachId, x.StartAt });
+
+            e.Property(x => x.TenantId).HasDefaultValue(1);
+            e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
         });
 
 
