@@ -26,8 +26,20 @@ public class ClientsController : ControllerBase
     }
 
     // GET /api/clients?coachId=1&page=1&pageSize=20&q=ana
+    /// <summary>
+    /// Obtiene una lista paginada de clientes asociados a un Coach.
+    /// </summary>
+    /// <param name="coachId">ID del Coach.</param>
+    /// <param name="page">Número de página (default 1).</param>
+    /// <param name="pageSize">Tamaño de página (default 20).</param>
+    /// <param name="q">Término de búsqueda opcional (nombre/email).</param>
+    /// <returns>Lista paginada de clientes.</returns>
     [HttpGet]
     [Authorize(Roles = "Coach,Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<PagedResult<ClientReadDto>>> Get(
     [FromQuery] int coachId,
     [FromQuery] int page = 1,
@@ -61,16 +73,32 @@ public class ClientsController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Obtiene un cliente por su ID.
+    /// </summary>
+    /// <param name="id">ID del cliente.</param>
+    /// <returns>Detalles del cliente.</returns>
     [HttpGet("{id:int}")]
     [AllowAnonymous]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ClientReadDto>> GetById(int id)
     {
         var client = await _repo.GetByIdAsync(id);
         return client is null ? NotFound() : Ok(_mapper.Map<ClientReadDto>(client));
     }
 
+    /// <summary>
+    /// Crea un nuevo cliente.
+    /// </summary>
+    /// <param name="input">Datos del nuevo cliente.</param>
+    /// <returns>El cliente creado.</returns>
     [HttpPost]
     [Authorize(Roles = "Coach,Admin")]
+    [ProducesResponseType(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
     public async Task<ActionResult<ClientReadDto>> Create([FromBody] ClientCreateDto input)
     {
         var role = GetRole();
@@ -96,8 +124,19 @@ public class ClientsController : ControllerBase
     }
 
 
+    /// <summary>
+    /// Actualiza un cliente existente.
+    /// </summary>
+    /// <param name="id">ID del cliente a actualizar.</param>
+    /// <param name="input">Datos actualizados.</param>
+    /// <returns>El cliente actualizado.</returns>
     [HttpPut("{id:int}")]
     [Authorize(Roles = "Coach,Admin")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<ActionResult<ClientReadDto>> Update(int id, [FromBody] ClientUpdateDto input)
     {
         var entity = await _repo.GetByIdAsync(id);
@@ -118,8 +157,17 @@ public class ClientsController : ControllerBase
         return Ok(_mapper.Map<ClientReadDto>(entity));
     }
 
+    /// <summary>
+    /// Elimina un cliente.
+    /// </summary>
+    /// <param name="id">ID del cliente a eliminar.</param>
+    /// <returns>No Content si fue eliminado.</returns>
     [HttpDelete("{id:int}")]
     [Authorize(Roles = "Coach,Admin")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
     public async Task<IActionResult> Delete(int id)
     {
         var entity = await _repo.GetByIdAsync(id);

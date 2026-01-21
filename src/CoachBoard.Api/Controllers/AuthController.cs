@@ -22,8 +22,16 @@ public class AuthController : ControllerBase
         _jwt = jwt;
     }
 
+    /// <summary>
+    /// Registra un nuevo usuario y su perfil de Coach.
+    /// </summary>
+    /// <param name="req">Datos de registro.</param>
+    /// <returns>Respuesta de autenticación con token JWT.</returns>
     [HttpPost("register")]
     [EnableRateLimiting("fixed")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
     {
         var existing = await _users.GetByEmailAsync(req.Email.Trim().ToLower());
@@ -71,8 +79,16 @@ public class AuthController : ControllerBase
         return Ok(new AuthResponse(token, user.Email, user.Role, coachId));
     }
 
+    /// <summary>
+    /// Inicia sesión y obtiene un token JWT.
+    /// </summary>
+    /// <param name="req">Credenciales de acceso.</param>
+    /// <returns>Respuesta de autenticación con token JWT.</returns>
     [HttpPost("login")]
     [EnableRateLimiting("fixed")]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req)
     {
         var normalizedEmail = req.Email.Trim().ToLower();
