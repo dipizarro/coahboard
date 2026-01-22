@@ -38,7 +38,7 @@ public class AuthControllerLoginTests
             .ReturnsAsync(user);
         coaches.Setup(repo => repo.GetByUserIdAsync(user.Id))
             .ReturnsAsync(coach);
-        jwt.Setup(service => service.GenerateToken(user.Email, user.Role, coach.Id))
+        jwt.Setup(service => service.GenerateToken(user.Email, user.Role, coach.Id, user.TenantId))
             .Returns("token-value");
 
         var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
@@ -56,7 +56,7 @@ public class AuthControllerLoginTests
 
         users.Verify(repo => repo.GetByEmailAsync("user@example.com"), Times.Once);
         coaches.Verify(repo => repo.GetByUserIdAsync(user.Id), Times.Once);
-        jwt.Verify(service => service.GenerateToken(user.Email, user.Role, coach.Id), Times.Once);
+        jwt.Verify(service => service.GenerateToken(user.Email, user.Role, coach.Id, It.IsAny<int?>()), Times.Once);
     }
 
     [Fact]

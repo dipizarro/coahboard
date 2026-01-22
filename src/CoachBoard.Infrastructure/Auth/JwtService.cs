@@ -12,7 +12,7 @@ public class JwtService : IJwtService
     private readonly IConfiguration _config;
     public JwtService(IConfiguration config) => _config = config;
 
-    public string GenerateToken(string email, string role, int? coachId = null)
+    public string GenerateToken(string email, string role, int? coachId = null, int? tenantId = null)
     {
         var claims = new List<Claim>
         {
@@ -24,6 +24,11 @@ public class JwtService : IJwtService
         if (coachId.HasValue)
         {
             claims.Add(new Claim("coachId", coachId.Value.ToString()));
+        }
+
+        if (tenantId.HasValue)
+        {
+            claims.Add(new Claim("tid", tenantId.Value.ToString()));
         }
 
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
