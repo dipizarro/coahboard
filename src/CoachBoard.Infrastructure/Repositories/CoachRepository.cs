@@ -7,11 +7,11 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class CoachRepository : Repository<Coach>, ICoachRepository
 {
-    public CoachRepository(CoachBoardDbContext context) : base(context) { }
+    public CoachRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<IEnumerable<Coach>> GetBySpecialtyAsync(string specialty)
     {
-        return await _context.Coaches
+        return await GetQuery()
             .Where(c => c.Specialty == specialty)
             .AsNoTracking()
             .ToListAsync();

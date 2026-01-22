@@ -7,11 +7,11 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class RoutineRepository : Repository<Routine>, IRoutineRepository
 {
-    public RoutineRepository(CoachBoardDbContext context) : base(context) { }
+    public RoutineRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<Routine?> GetWithItemsAsync(int id)
     {
-        return await _context.Routines
+        return await GetQuery()
             .Include(r => r.RoutineExercises)
                 .ThenInclude(re => re.Exercise)
             .AsNoTracking()
@@ -21,7 +21,7 @@ public class RoutineRepository : Repository<Routine>, IRoutineRepository
     public async Task<IEnumerable<Routine>> GetByClientAsync(int clientId, int page, int pageSize, string? q)
     {
         // Declarar explícitamente como IQueryable para poder reasignar después de Where/Include
-        IQueryable<Routine> query = _context.Routines
+        IQueryable<Routine> query = GetQuery()
             .AsNoTracking()
             .Where(r => r.ClientId == clientId);
 
@@ -45,7 +45,7 @@ public class RoutineRepository : Repository<Routine>, IRoutineRepository
 
     public async Task<int> CountByClientAsync(int clientId, string? q)
     {
-        var query = _context.Routines.Where(r => r.ClientId == clientId);
+        var query = GetQuery().Where(r => r.ClientId == clientId);
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim().ToLower();

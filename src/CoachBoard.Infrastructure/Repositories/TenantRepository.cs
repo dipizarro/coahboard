@@ -6,7 +6,7 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class TenantRepository : Repository<Tenant>, ITenantRepository
 {
-    public TenantRepository(CoachBoardDbContext context) : base(context)
+    public TenantRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant)
     {
     }
 }

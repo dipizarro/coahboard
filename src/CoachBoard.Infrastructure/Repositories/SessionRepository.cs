@@ -7,7 +7,7 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class SessionRepository : Repository<Session>, ISessionRepository
 {
-    public SessionRepository(CoachBoardDbContext context) : base(context) { }
+    public SessionRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<IEnumerable<Session>> GetByCoachAsync(
         int coachId,
@@ -15,7 +15,7 @@ public class SessionRepository : Repository<Session>, ISessionRepository
         DateTime to,
         int? clientId)
     {
-        var query = _context.Sessions
+        var query = GetQuery()
             .Include(s => s.Client)
             .Include(s => s.Routine)
             .AsNoTracking()
@@ -35,7 +35,7 @@ public class SessionRepository : Repository<Session>, ISessionRepository
 
     public async Task<Session?> GetWithRelationsAsync(int id)
     {
-        return await _context.Sessions
+        return await GetQuery()
             .Include(s => s.Client)
             .Include(s => s.Routine)
             .AsNoTracking()

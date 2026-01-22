@@ -1,0 +1,16 @@
+﻿  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos est├ín actualizados para la restauraci├│n.
+  CoachBoard.Contracts -> C:\Sistemas\CoachBoard\src\CoachBoard.Contracts\bin\Debug\net9.0\CoachBoard.Contracts.dll
+  CoachBoard.Domain -> C:\Sistemas\CoachBoard\src\CoachBoard.Domain\bin\Debug\net9.0\CoachBoard.Domain.dll
+  CoachBoard.Application -> C:\Sistemas\CoachBoard\src\CoachBoard.Application\bin\Debug\net9.0\CoachBoard.Application.dll
+  CoachBoard.Infrastructure -> C:\Sistemas\CoachBoard\src\CoachBoard.Infrastructure\bin\Debug\net9.0\CoachBoard.Infrastructure.dll
+  CoachBoard.Api -> C:\Sistemas\CoachBoard\src\CoachBoard.Api\bin\Debug\net9.0\CoachBoard.Api.dll
+C:\Sistemas\CoachBoard\tests\CoachBoard.Application.Tests\RepositoryTenantTests.cs(23,14): error CS1061: "DbContextOptionsBuilder<CoachBoardDbContext>" no contiene una definici├│n para "UseInMemoryDatabase" ni un m├®todo de extensi├│n accesible "UseInMemoryDatabase" que acepte un primer argumento del tipo "DbContextOptionsBuilder<CoachBoardDbContext>" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Application.Tests\CoachBoard.Application.Tests.csproj]
+
+ERROR al compilar.
+
+C:\Sistemas\CoachBoard\tests\CoachBoard.Application.Tests\RepositoryTenantTests.cs(23,14): error CS1061: "DbContextOptionsBuilder<CoachBoardDbContext>" no contiene una definici├│n para "UseInMemoryDatabase" ni un m├®todo de extensi├│n accesible "UseInMemoryDatabase" que acepte un primer argumento del tipo "DbContextOptionsBuilder<CoachBoardDbContext>" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Application.Tests\CoachBoard.Application.Tests.csproj]
+    0 Advertencia(s)
+    1 Errores
+
+Tiempo transcurrido 00:00:07.00

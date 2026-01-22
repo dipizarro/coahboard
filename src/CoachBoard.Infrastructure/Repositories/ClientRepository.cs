@@ -7,11 +7,11 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class ClientRepository : Repository<Client>, IClientRepository
 {
-    public ClientRepository(CoachBoardDbContext context) : base(context) { }
+    public ClientRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<IEnumerable<Client>> GetByCoachAsync(int coachId, int page, int pageSize, string? q)
     {
-        var query = _context.Clients.AsNoTracking().Where(c => c.CoachId == coachId);
+        var query = GetQuery().AsNoTracking().Where(c => c.CoachId == coachId);
 
         if (!string.IsNullOrWhiteSpace(q))
         {
@@ -31,7 +31,7 @@ public class ClientRepository : Repository<Client>, IClientRepository
 
     public async Task<int> CountByCoachAsync(int coachId, string? q)
     {
-        var query = _context.Clients.Where(c => c.CoachId == coachId);
+        var query = GetQuery().Where(c => c.CoachId == coachId);
 
         if (!string.IsNullOrWhiteSpace(q))
         {

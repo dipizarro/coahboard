@@ -7,7 +7,7 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class UserRepository : Repository<User>, IUserRepository
 {
-    public UserRepository(CoachBoardDbContext context) : base(context) { }
+    public UserRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<User?> GetByEmailAsync(string email)
         => await _context.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);

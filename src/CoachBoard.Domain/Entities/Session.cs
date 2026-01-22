@@ -1,6 +1,6 @@
 ﻿namespace CoachBoard.Domain.Entities;
 
-public class Session
+public class Session : ITenantEntity
 {
     public int Id { get; set; }
 

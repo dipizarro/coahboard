@@ -1,6 +1,6 @@
 ﻿namespace CoachBoard.Domain.Entities;
 
-public class Routine
+public class Routine : ITenantEntity
 {
     public int Id { get; set; }
     public string Title { get; set; } = null!;

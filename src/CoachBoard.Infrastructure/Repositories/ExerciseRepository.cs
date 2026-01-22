@@ -7,7 +7,7 @@ namespace CoachBoard.Infrastructure.Repositories;
 
 public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
 {
-    public ExerciseRepository(CoachBoardDbContext context) : base(context) { }
+    public ExerciseRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
     public async Task<IEnumerable<Exercise>> SearchAsync(string? q, string? category, int page, int pageSize)
     {

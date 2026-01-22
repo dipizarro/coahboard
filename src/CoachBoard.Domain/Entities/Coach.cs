@@ -1,6 +1,6 @@
 ﻿namespace CoachBoard.Domain.Entities;
 
-public class Coach
+public class Coach : ITenantEntity
 {
     public int Id { get; set; }
     public int? UserId { get; set; }

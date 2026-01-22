@@ -1,4 +1,7 @@
+using System;
 using System.Security.Claims;
+using System.Threading.Tasks;
+using Xunit;
 using CoachBoard.Api.Services;
 using FluentAssertions;
 using Microsoft.AspNetCore.Http;

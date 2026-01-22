@@ -1,6 +1,6 @@
 ﻿namespace CoachBoard.Domain.Entities;
 
-public class Client
+public class Client : ITenantEntity
 {
     public int Id { get; set; }
     public string FullName { get; set; } = null!;

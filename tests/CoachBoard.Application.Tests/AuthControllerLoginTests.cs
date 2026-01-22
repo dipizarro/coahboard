@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using CoachBoard.Api.Controllers;
 using CoachBoard.Application.DTOs;
 using CoachBoard.Application.Interfaces;
@@ -5,6 +7,7 @@ using CoachBoard.Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Moq;
+using Xunit;
 
 namespace CoachBoard.Application.Tests;
 
@@ -85,7 +88,7 @@ public class AuthControllerLoginTests
 
         actionResult.Result.Should().BeOfType<UnauthorizedObjectResult>();
         coaches.Verify(repo => repo.GetByUserIdAsync(It.IsAny<int>()), Times.Never);
-        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>()), Times.Never);
+        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]
@@ -107,6 +110,6 @@ public class AuthControllerLoginTests
 
         actionResult.Result.Should().BeOfType<UnauthorizedObjectResult>();
         coaches.Verify(repo => repo.GetByUserIdAsync(It.IsAny<int>()), Times.Never);
-        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>()), Times.Never);
+        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 }
