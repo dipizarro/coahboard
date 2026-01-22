@@ -1,0 +1,18 @@
+﻿  Determinando los proyectos que se van a restaurar...
+  Todos los proyectos est├ín actualizados para la restauraci├│n.
+  CoachBoard.Domain -> C:\Sistemas\CoachBoard\src\CoachBoard.Domain\bin\Debug\net9.0\CoachBoard.Domain.dll
+  CoachBoard.Contracts -> C:\Sistemas\CoachBoard\src\CoachBoard.Contracts\bin\Debug\net9.0\CoachBoard.Contracts.dll
+  CoachBoard.Application -> C:\Sistemas\CoachBoard\src\CoachBoard.Application\bin\Debug\net9.0\CoachBoard.Application.dll
+  CoachBoard.Infrastructure -> C:\Sistemas\CoachBoard\src\CoachBoard.Infrastructure\bin\Debug\net9.0\CoachBoard.Infrastructure.dll
+  CoachBoard.Api -> C:\Sistemas\CoachBoard\src\CoachBoard.Api\bin\Debug\net9.0\CoachBoard.Api.dll
+C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\TenantIsolationIntegrationTests.cs(56,45): error CS1061: "HttpContent" no contiene una definici├│n para "ReadFromJsonAsync" ni un m├®todo de extensi├│n accesible "ReadFromJsonAsync" que acepte un primer argumento del tipo "HttpContent" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CoachBoard.Api.Tests.csproj]
+C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CustomWebApplicationFactory.cs(111,37): error CS1061: "HttpClient" no contiene una definici├│n para "PostAsJsonAsync" ni un m├®todo de extensi├│n accesible "PostAsJsonAsync" que acepte un primer argumento del tipo "HttpClient" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CoachBoard.Api.Tests.csproj]
+
+ERROR al compilar.
+
+C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\TenantIsolationIntegrationTests.cs(56,45): error CS1061: "HttpContent" no contiene una definici├│n para "ReadFromJsonAsync" ni un m├®todo de extensi├│n accesible "ReadFromJsonAsync" que acepte un primer argumento del tipo "HttpContent" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CoachBoard.Api.Tests.csproj]
+C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CustomWebApplicationFactory.cs(111,37): error CS1061: "HttpClient" no contiene una definici├│n para "PostAsJsonAsync" ni un m├®todo de extensi├│n accesible "PostAsJsonAsync" que acepte un primer argumento del tipo "HttpClient" (┬┐falta alguna directiva using o una referencia de ensamblado?) [C:\Sistemas\CoachBoard\tests\CoachBoard.Api.Tests\CoachBoard.Api.Tests.csproj]
+    0 Advertencia(s)
+    2 Errores
+
+Tiempo transcurrido 00:00:03.32

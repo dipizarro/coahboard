@@ -6,6 +6,8 @@ using CoachBoard.Application.Interfaces;
 using CoachBoard.Domain.Entities;
 using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 using Moq;
 using Xunit;
 
@@ -44,7 +46,8 @@ public class AuthControllerLoginTests
         jwt.Setup(service => service.GenerateToken(user.Email, user.Role, coach.Id, user.TenantId))
             .Returns("token-value");
 
-        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
+        var logger = NullLogger<AuthController>.Instance;
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object, logger);
 
         var actionResult = await controller.Login(loginRequest);
 
@@ -82,7 +85,8 @@ public class AuthControllerLoginTests
         users.Setup(repo => repo.GetByEmailAsync("user@example.com"))
             .ReturnsAsync(user);
 
-        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
+        var logger = NullLogger<AuthController>.Instance;
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object, logger);
 
         var actionResult = await controller.Login(loginRequest);
 
@@ -104,7 +108,8 @@ public class AuthControllerLoginTests
         users.Setup(repo => repo.GetByEmailAsync("missing@example.com"))
             .ReturnsAsync((User?)null);
 
-        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object);
+        var logger = NullLogger<AuthController>.Instance;
+        var controller = new AuthController(users.Object, coaches.Object, tenants.Object, jwt.Object, logger);
 
         var actionResult = await controller.Login(loginRequest);
 

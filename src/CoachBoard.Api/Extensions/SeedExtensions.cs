@@ -17,7 +17,7 @@ public static class SeedExtensions
             await users.AddAsync(new User
             {
                 Email = "admin@coachboard.cl",
-                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass1234!"),
+                PasswordHash = BCrypt.Net.BCrypt.HashPassword("Pass1234!", 11),
                 Role = "Admin"
             });
             await users.SaveChangesAsync();

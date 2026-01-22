@@ -1,4 +1,5 @@
 using System.Runtime.CompilerServices;
+using System.IdentityModel.Tokens.Jwt;
 // Middlewares (si tienes el de excepciones)
 using CoachBoard.Api.Extensions;
 using CoachBoard.Api.Services;
@@ -26,6 +27,8 @@ using System.Text;
 using System.Threading.RateLimiting;
 
 [assembly: InternalsVisibleTo("CoachBoard.Api.Tests")]
+
+JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
 var builder = WebApplication.CreateBuilder(args);
 

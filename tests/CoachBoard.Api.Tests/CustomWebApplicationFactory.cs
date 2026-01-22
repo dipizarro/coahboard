@@ -5,6 +5,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using System.Net.Http.Json;
 
 namespace CoachBoard.Api.Tests;
 
@@ -48,41 +50,86 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
 
             // Register the context using these options
             services.AddScoped<CoachBoardDbContext>();
-
-            // If we need Seeding, we must do it within a scope
-            using var serviceProvider = services.BuildServiceProvider();
-            using var scope = serviceProvider.CreateScope();
-            var db = scope.ServiceProvider.GetRequiredService<CoachBoardDbContext>();
-            db.Database.EnsureCreated();
-            SeedTestData(db);
         });
+    }
+
+    protected override IHost CreateHost(IHostBuilder builder)
+    {
+        var host = base.CreateHost(builder);
+        using var scope = host.Services.CreateScope();
+        var db = scope.ServiceProvider.GetRequiredService<CoachBoardDbContext>();
+        db.Database.EnsureCreated();
+        SeedTestData(db);
+        return host;
     }
 
     private static void SeedTestData(CoachBoardDbContext db)
     {
-        if (db.Users.Any())
+        if (db.Users.Any(u => u.Email == "usera@test.local")) 
         {
             return;
         }
 
-        var user = new Domain.Entities.User
+        // Seed Tenant A
+        var tenantA = new Domain.Entities.Tenant { Id = 10, Name = "Tenant A" };
+        var userA = new Domain.Entities.User
         {
-            Id = 1,
-            Email = "coach@test.local",
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword("P@ssw0rd!"),
-            Role = "Coach"
+            Id = 10,
+            Email = "usera@test.local",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("P@ssw0rd!", 11),
+            Role = "Coach",
+            TenantId = 10
+        };
+        var coachA = new Domain.Entities.Coach
+        {
+            Id = 10,
+            UserId = 10,
+            Name = "Coach A",
+            Specialty = "General",
+            TenantId = 10
         };
 
-        var coach = new Domain.Entities.Coach
+        // Seed Tenant B
+        var tenantB = new Domain.Entities.Tenant { Id = 11, Name = "Tenant B" };
+        var userB = new Domain.Entities.User
         {
-            Id = 1,
-            UserId = user.Id,
-            Name = "Test Coach",
-            Specialty = "General"
+            Id = 11,
+            Email = "userb@test.local",
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword("P@ssw0rd!", 11),
+            Role = "Coach",
+            TenantId = 11
+        };
+        var coachB = new Domain.Entities.Coach
+        {
+            Id = 11,
+            UserId = 11,
+            Name = "Coach B",
+            Specialty = "General",
+            TenantId = 11
         };
 
-        db.Users.Add(user);
-        db.Coaches.Add(coach);
+        db.Tenants.AddRange(tenantA, tenantB);
+        db.Users.AddRange(userA, userB);
+        db.Coaches.AddRange(coachA, coachB);
         db.SaveChanges();
+        Console.WriteLine($"Seeded userA: {userA.Email}, Hash: {userA.PasswordHash}");
     }
+
+    public async Task<string> LoginAsAsync(HttpClient client, string email, string password)
+    {
+        var response = await client.PostAsJsonAsync("/api/auth/login", new { email, password });
+        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Login failed for {email}: {body}");
+        }
+        response.EnsureSuccessStatusCode();
+        var result = await response.Content.ReadFromJsonAsync<AuthResponse>();
+        return result!.Token;
+    }
+
+    public Task<string> GetUserATokenAsync(HttpClient client) => LoginAsAsync(client, "usera@test.local", "P@ssw0rd!");
+    public Task<string> GetUserBTokenAsync(HttpClient client) => LoginAsAsync(client, "userb@test.local", "P@ssw0rd!");
 }
+
+public record AuthResponse(string Token, string Email, string Role);

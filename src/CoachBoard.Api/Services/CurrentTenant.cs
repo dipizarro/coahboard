@@ -17,7 +17,9 @@ public class CurrentTenant : ICurrentTenant
         get
         {
             var user = _httpContextAccessor.HttpContext?.User;
-            var claim = user?.FindFirst("tid") ?? user?.FindFirst("tenantId");
+            var claim = user?.FindFirst("tid") 
+                     ?? user?.FindFirst("tenantId") 
+                     ?? user?.FindFirst("http://schemas.microsoft.com/identity/claims/tenantid");
             
             if (claim is null) return null;
             

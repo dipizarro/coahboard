@@ -15,13 +15,15 @@ public class AuthController : ControllerBase
     private readonly ICoachRepository _coaches;
     private readonly ITenantRepository _tenants;
     private readonly IJwtService _jwt;
+    private readonly ILogger<AuthController> _logger;
 
-    public AuthController(IUserRepository users, ICoachRepository coaches, ITenantRepository tenants, IJwtService jwt)
+    public AuthController(IUserRepository users, ICoachRepository coaches, ITenantRepository tenants, IJwtService jwt, ILogger<AuthController> logger)
     {
         _users = users;
         _coaches = coaches;
         _tenants = tenants;
         _jwt = jwt;
+        _logger = logger;
     }
 
     /// <summary>
@@ -36,10 +38,10 @@ public class AuthController : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<AuthResponse>> Register([FromBody] RegisterRequest req)
     {
-        var existing = await _users.GetByEmailAsync(req.Email.Trim().ToLower());
+        var normalizedEmail = req.Email.Trim().ToLower();
+        var existing = await _users.GetByEmailAsync(normalizedEmail);
         if (existing is not null) return Conflict("Email ya registrado.");
 
-        var normalizedEmail = req.Email.Trim().ToLower();
         var role = string.IsNullOrWhiteSpace(req.Role) ? "Coach" : req.Role.Trim();
 
         // 1. Create Tenant
@@ -52,7 +54,7 @@ public class AuthController : ControllerBase
         var user = new User
         {
             Email = normalizedEmail,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(req.Password, 11),
             Role = role,
             TenantId = tenant.Id
         };
@@ -103,11 +105,20 @@ public class AuthController : ControllerBase
     public async Task<ActionResult<AuthResponse>> Login([FromBody] LoginRequest req)
     {
         var normalizedEmail = req.Email.Trim().ToLower();
+        
         var user = await _users.GetByEmailAsync(normalizedEmail);
-        if (user is null) return Unauthorized("Credenciales inválidas.");
+        
+        if (user is null) 
+        {
+            return Unauthorized("Credenciales inválidas.");
+        }
 
         var ok = BCrypt.Net.BCrypt.Verify(req.Password, user.PasswordHash);
-        if (!ok) return Unauthorized("Credenciales inválidas.");
+        
+        if (!ok) 
+        {
+            return Unauthorized("Credenciales inválidas.");
+        }
 
         int? coachId = null;
         if (user.Role.Equals("Coach", StringComparison.OrdinalIgnoreCase))
