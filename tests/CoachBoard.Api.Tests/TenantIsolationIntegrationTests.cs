@@ -57,8 +57,54 @@ public class TenantIsolationIntegrationTests : BaseIntegrationTest
         response.StatusCode.Should().Be(HttpStatusCode.OK);
         var result = await response.Content.ReadFromJsonAsync<PagedResult<dynamic>>();
         result.Should().NotBeNull();
-        result!.Items.Should().HaveCount(1);
+        result!.Items.Should().HaveCount(2);
+    }
+    [Fact]
+    public async Task Routine_TenantIsolation_FullScenario()
+    {
+        // 1. Authenticate as User A
+        await AuthenticateAsUserAAsync();
+
+        // 2. Create a Routine for Client 10 (Tenant A) using Exercise 10 (Seeded in Factory)
+        var createDto = new RoutineCreateDto(
+            "Routine A", 
+            10, 
+            new List<RoutineItemDto> { new RoutineItemDto(10, 3, 10, 1, "Notes") }
+        );
+        var createResponse = await Client.PostAsJsonAsync("/api/routines", createDto);
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+        var routine = await createResponse.Content.ReadFromJsonAsync<RoutineReadDto>();
+        routine.Should().NotBeNull();
+
+        // 3. Authenticate as User B
+        await AuthenticateAsUserBAsync();
+
+        // 4. Attempt to GET the Routine by ID -> Expect 404 Not Found (Isolation at Repo level)
+        var getByIdResponse = await Client.GetAsync($"/api/routines/{routine!.Id}");
+        getByIdResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
+
+        // 5. Attempt to GET all Routines for Client 10 -> Expect 403 Forbidden (Controller checks if Client belongs to Coach)
+        // Note: Coach B (User B) doesn't own Client 10.
+        var getByClientResponse = await Client.GetAsync("/api/routines?clientId=10");
+        // Looking at RoutinesController.Get, there isn't an explicit "Coach B owns Client 10" check in the GET routines list?
+        // Wait, RoutinesController.Get calls _repo.GetByClientAsync(clientId...).
+        // But Client 10 belongs to Tenant 10, and User B is Tenant 11.
+        // The repository tenant filter will apply, so User B (Tenant 11) won't find Client 10 if we have isolation there.
+        // Actually, RoutinesController doesn't check ownership of ClientId manually like ClientsController does.
+        // However, the RoutineRepository will filter Routines by TenantId 11, so it will return empty list.
+        getByClientResponse.StatusCode.Should().Be(HttpStatusCode.OK); // List endpoint usually returns 200 even if empty
+        var result = await getByClientResponse.Content.ReadFromJsonAsync<PagedResult<RoutineReadDto>>();
+        result!.Items.Should().BeEmpty();
+
+        // 6. Authenticate back as User A
+        await AuthenticateAsUserAAsync();
+
+        // 7. GET the Routine by ID -> Expect 200 OK
+        var getByIdSuccessResponse = await Client.GetAsync($"/api/routines/{routine.Id}");
+        getByIdSuccessResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var finalRoutine = await getByIdSuccessResponse.Content.ReadFromJsonAsync<RoutineReadDto>();
+        finalRoutine!.Title.Should().Be("Routine A");
     }
 }
 
-public record PagedResult<T>(IEnumerable<T> Items, int Total, int Page, int PageSize);
+

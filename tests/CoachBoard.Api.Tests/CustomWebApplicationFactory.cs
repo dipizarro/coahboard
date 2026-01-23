@@ -70,6 +70,9 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             return;
         }
 
+        // Global Exercise
+        var exercise = new Domain.Entities.Exercise { Id = 10, Name = "Push Up", Category = "Chest" };
+
         // Seed Tenant A
         var tenantA = new Domain.Entities.Tenant { Id = 10, Name = "Tenant A" };
         var userA = new Domain.Entities.User
@@ -86,6 +89,14 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             UserId = 10,
             Name = "Coach A",
             Specialty = "General",
+            TenantId = 10
+        };
+        var clientA = new Domain.Entities.Client
+        {
+            Id = 10,
+            FullName = "Client A",
+            Email = "clienta@test.local",
+            CoachId = 10,
             TenantId = 10
         };
 
@@ -107,10 +118,20 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
             Specialty = "General",
             TenantId = 11
         };
+        var clientB = new Domain.Entities.Client
+        {
+            Id = 11,
+            FullName = "Client B",
+            Email = "clientb@test.local",
+            CoachId = 11,
+            TenantId = 11
+        };
 
         db.Tenants.AddRange(tenantA, tenantB);
         db.Users.AddRange(userA, userB);
         db.Coaches.AddRange(coachA, coachB);
+        db.Exercises.Add(exercise);
+        db.Clients.AddRange(clientA, clientB);
         db.SaveChanges();
         Console.WriteLine($"Seeded userA: {userA.Email}, Hash: {userA.PasswordHash}");
     }
