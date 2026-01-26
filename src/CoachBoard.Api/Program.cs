@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 // Middlewares (si tienes el de excepciones)
 using CoachBoard.Api.Extensions;
 using CoachBoard.Api.Services;
+using CoachBoard.Application.Services;
 using CoachBoard.API.Middlewares;
 // Repositorios / App
 using CoachBoard.Application.Interfaces;
@@ -178,6 +179,7 @@ builder.Services.AddRateLimiter(options =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
+builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
 
 var app = builder.Build();
 
