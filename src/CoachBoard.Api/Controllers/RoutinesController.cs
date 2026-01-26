@@ -17,10 +17,16 @@ public class RoutinesController : ControllerBase
     private readonly IClientRepository _clientRepo;
     private readonly IExerciseRepository _exerciseRepo;
     private readonly IMapper _mapper;
+    private readonly IPlanLimitsProvider _limits;
+    private readonly ITenantRepository _tenantRepo;
+    private readonly ICurrentTenant _currentTenant;
 
-    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper)
+    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant)
     {
         _repo = repo; _clientRepo = clientRepo; _exerciseRepo = exerciseRepo; _mapper = mapper;
+        _limits = limits;
+        _tenantRepo = tenantRepo;
+        _currentTenant = currentTenant;
     }
 
     // GET /api/routines?clientId=1&page=1&pageSize=20&q=pecho
@@ -50,6 +56,23 @@ public class RoutinesController : ControllerBase
         // validar client
         var client = await _clientRepo.GetByIdAsync(input.ClientId);
         if (client is null) return BadRequest("ClientId inválido.");
+
+        // Check Plan Limits
+        var tenantId = _currentTenant.TenantId ?? 0;
+        var tenant = await _tenantRepo.GetByIdAsync(tenantId);
+
+        if (tenant is not null)
+        {
+            var limits = _limits.GetLimits(tenant.Plan);
+            if (limits.MaxRoutines != -1)
+            {
+                var count = await _repo.CountAsync();
+                if (count >= limits.MaxRoutines)
+                {
+                    return Conflict($"Has alcanzado el límite de {limits.MaxRoutines} rutinas para tu plan {tenant.Plan}.");
+                }
+            }
+        }
 
         // validar exercises existen
         var exerciseIds = input.Items.Select(i => i.ExerciseId).Distinct().ToArray();

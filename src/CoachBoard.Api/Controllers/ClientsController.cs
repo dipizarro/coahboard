@@ -17,12 +17,18 @@ public class ClientsController : ControllerBase
     private readonly IClientRepository _repo;
     private readonly IMapper _mapper;
     private readonly ICoachRepository _coachRepo;
+    private readonly IPlanLimitsProvider _limits;
+    private readonly ITenantRepository _tenantRepo;
+    private readonly ICurrentTenant _currentTenant;
 
-    public ClientsController(IClientRepository repo, ICoachRepository coachRepo, IMapper mapper)
+    public ClientsController(IClientRepository repo, ICoachRepository coachRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant)
     {
         _repo = repo;
         _coachRepo = coachRepo;
         _mapper = mapper;
+        _limits = limits;
+        _tenantRepo = tenantRepo;
+        _currentTenant = currentTenant;
     }
 
     // GET /api/clients?coachId=1&page=1&pageSize=20&q=ana
@@ -99,6 +105,7 @@ public class ClientsController : ControllerBase
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<ActionResult<ClientReadDto>> Create([FromBody] ClientCreateDto input)
     {
         var role = GetRole();
@@ -114,6 +121,23 @@ public class ClientsController : ControllerBase
 
         var coach = await _coachRepo.GetByIdAsync(input.CoachId);
         if (coach is null) return BadRequest("CoachId inválido.");
+
+        // Check Plan Limits
+        var tenantId = _currentTenant.TenantId ?? 0;
+        var tenant = await _tenantRepo.GetByIdAsync(tenantId);
+        
+        if (tenant is not null)
+        {
+            var limits = _limits.GetLimits(tenant.Plan);
+            if (limits.MaxAthletes != -1)
+            {
+                var count = await _repo.CountAsync();
+                if (count >= limits.MaxAthletes)
+                {
+                    return Conflict($"Has alcanzado el límite de {limits.MaxAthletes} atletas para tu plan {tenant.Plan}.");
+                }
+            }
+        }
 
         var entity = _mapper.Map<Client>(input);
         await _repo.AddAsync(entity);

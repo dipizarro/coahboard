@@ -87,6 +87,16 @@ public class Repository<T> : IRepository<T> where T : class
         _dbSet.Remove(entity);
     }
 
+    public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+    {
+        var query = GetQuery();
+        if (predicate != null)
+        {
+            query = query.Where(predicate);
+        }
+        return await query.CountAsync();
+    }
+
     public async Task SaveChangesAsync()
     {
         await _context.SaveChangesAsync();
