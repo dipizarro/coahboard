@@ -180,6 +180,7 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
 builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
+builder.Services.AddScoped<IFeatureFlags, FeatureFlagsService>();
 
 var app = builder.Build();
 

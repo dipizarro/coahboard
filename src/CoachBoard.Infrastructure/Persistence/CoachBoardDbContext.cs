@@ -16,6 +16,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
+    public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -169,6 +170,23 @@ public class CoachBoardDbContext : DbContext
         });
 
 
-        base.OnModelCreating(modelBuilder);
+        // FeatureFlag
+        modelBuilder.Entity<FeatureFlag>(e =>
+        {
+            e.ToTable("FeatureFlags");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Name).IsRequired().HasMaxLength(100);
+            e.Property(x => x.IsEnabled).IsRequired();
+
+            e.HasOne(x => x.Tenant)
+                .WithMany()
+                .HasForeignKey(x => x.TenantId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
+        });
+
+
+		base.OnModelCreating(modelBuilder);
     }
 }
