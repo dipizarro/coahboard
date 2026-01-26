@@ -74,7 +74,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         var exercise = new Domain.Entities.Exercise { Id = 10, Name = "Push Up", Category = "Chest" };
 
         // Seed Tenant A
-        var tenantA = new Domain.Entities.Tenant { Id = 10, Name = "Tenant A" };
+        var tenantA = new Domain.Entities.Tenant { Id = 10, Name = "Tenant A", Plan = Domain.Enums.SubscriptionPlan.Free };
         var userA = new Domain.Entities.User
         {
             Id = 10,
@@ -101,7 +101,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         };
 
         // Seed Tenant B
-        var tenantB = new Domain.Entities.Tenant { Id = 11, Name = "Tenant B" };
+        var tenantB = new Domain.Entities.Tenant { Id = 11, Name = "Tenant B", Plan = Domain.Enums.SubscriptionPlan.Free };
         var userB = new Domain.Entities.User
         {
             Id = 11,

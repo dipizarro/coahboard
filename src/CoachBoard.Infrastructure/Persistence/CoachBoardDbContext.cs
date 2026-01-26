@@ -1,4 +1,5 @@
 ﻿using CoachBoard.Domain.Entities;
+using CoachBoard.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
 
 namespace CoachBoard.Infrastructure.Persistence;
@@ -25,7 +26,11 @@ public class CoachBoardDbContext : DbContext
             e.ToTable("Tenants");
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired().HasMaxLength(150);
-            e.HasData(new Tenant { Id = 1, Name = "Default Tenant", CreatedAt = DateTime.UtcNow });
+            e.Property(x => x.Plan)
+                .IsRequired()
+                .HasConversion<string>()
+                .HasDefaultValue(SubscriptionPlan.Free);
+            e.HasData(new Tenant { Id = 1, Name = "Default Tenant", Plan = SubscriptionPlan.Free, CreatedAt = new DateTime(2025, 1, 1, 0, 0, 0, DateTimeKind.Utc) });
         });
 
         modelBuilder.Entity<Coach>(e =>
