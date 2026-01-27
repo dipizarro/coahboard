@@ -43,7 +43,7 @@ public class AuthControllerLoginTests
             .ReturnsAsync(user);
         coaches.Setup(repo => repo.GetByUserIdAsync(user.Id))
             .ReturnsAsync(coach);
-        jwt.Setup(service => service.GenerateToken(user.Email, user.Role, coach.Id, user.TenantId))
+        jwt.Setup(service => service.GenerateToken(user.Id, user.Email, user.Role, coach.Id, user.TenantId))
             .Returns("token-value");
 
         var logger = NullLogger<AuthController>.Instance;
@@ -62,7 +62,7 @@ public class AuthControllerLoginTests
 
         users.Verify(repo => repo.GetByEmailAsync("user@example.com"), Times.Once);
         coaches.Verify(repo => repo.GetByUserIdAsync(user.Id), Times.Once);
-        jwt.Verify(service => service.GenerateToken(user.Email, user.Role, coach.Id, It.IsAny<int?>()), Times.Once);
+        jwt.Verify(service => service.GenerateToken(user.Id, user.Email, user.Role, coach.Id, It.IsAny<int?>()), Times.Once);
     }
 
     [Fact]
@@ -92,7 +92,7 @@ public class AuthControllerLoginTests
 
         actionResult.Result.Should().BeOfType<UnauthorizedObjectResult>();
         coaches.Verify(repo => repo.GetByUserIdAsync(It.IsAny<int>()), Times.Never);
-        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
+        jwt.Verify(service => service.GenerateToken(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 
     [Fact]
@@ -115,6 +115,6 @@ public class AuthControllerLoginTests
 
         actionResult.Result.Should().BeOfType<UnauthorizedObjectResult>();
         coaches.Verify(repo => repo.GetByUserIdAsync(It.IsAny<int>()), Times.Never);
-        jwt.Verify(service => service.GenerateToken(It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
+        jwt.Verify(service => service.GenerateToken(It.IsAny<int>(), It.IsAny<string>(), It.IsAny<string>(), It.IsAny<int?>(), It.IsAny<int?>()), Times.Never);
     }
 }

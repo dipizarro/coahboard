@@ -88,7 +88,7 @@ public class AuthController : ControllerBase
             coachId = coach.Id;
         }
 
-        var token = _jwt.GenerateToken(user.Email, user.Role, coachId, tenant.Id);
+        var token = _jwt.GenerateToken(user.Id, user.Email, user.Role, coachId, tenant.Id);
         return Ok(new AuthResponse(token, user.Email, user.Role, coachId));
     }
 
@@ -127,7 +127,7 @@ public class AuthController : ControllerBase
             coachId = coach?.Id;
         }
 
-        var token = _jwt.GenerateToken(user.Email, user.Role, coachId, user.TenantId);
+        var token = _jwt.GenerateToken(user.Id, user.Email, user.Role, coachId, user.TenantId);
         return Ok(new AuthResponse(token, user.Email, user.Role, coachId));
     }
 }

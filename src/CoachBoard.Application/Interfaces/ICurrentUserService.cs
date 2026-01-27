@@ -9,6 +9,7 @@ public interface ICurrentUserService
     string? Email { get; }
     string? Role { get; }
     int? CoachId { get; }
+    int? UserId { get; }
 
     bool IsAuthenticated { get; }
     bool IsAdmin { get; }

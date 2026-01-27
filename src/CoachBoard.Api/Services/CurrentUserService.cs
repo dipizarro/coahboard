@@ -34,6 +34,16 @@ public class CurrentUserService : ICurrentUserService
         }
     }
 
+    public int? UserId
+    {
+        get
+        {
+            var claim = User?.FindFirst("uid");
+            if (claim is null) return null;
+            return int.TryParse(claim.Value, out var id) ? id : null;
+        }
+    }
+
     public bool IsAdmin => string.Equals(Role, "Admin", StringComparison.OrdinalIgnoreCase);
     public bool IsCoach => string.Equals(Role, "Coach", StringComparison.OrdinalIgnoreCase);
 }

@@ -7,5 +7,6 @@ public enum SubscriptionStatus
     Trialing = 2,
     PastDue = 3,
     Canceled = 4,
-    Unpaid = 5
+    Unpaid = 5,
+    Pending = 6
 }

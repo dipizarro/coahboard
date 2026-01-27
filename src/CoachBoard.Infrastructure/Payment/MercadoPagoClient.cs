@@ -20,12 +20,12 @@ public class MercadoPagoClient : IMercadoPagoClient
         _logger = logger;
     }
 
-    public Task<string> CreateProCheckoutAsync(int userId, string email)
+    public Task<string> CreateProCheckoutAsync(int userId, string email, int tenantId)
     {
-        _logger.LogInformation("Creating Pro Checkout for User {UserId} ({Email}). Currency: {Currency}", userId, email, _options.Currency);
+        _logger.LogInformation("Creating Pro Checkout for User {UserId} ({Email}) Tenant {TenantId}. Currency: {Currency}", userId, email, tenantId, _options.Currency);
         
         // Stub implementation
-        var simulatedCheckoutUrl = $"{_options.PendingUrl}?simulated=true&user={userId}";
+        var simulatedCheckoutUrl = $"{_options.PendingUrl}?simulated=true&user={userId}&tenant={tenantId}&plan=pro";
         return Task.FromResult(simulatedCheckoutUrl);
     }
 
