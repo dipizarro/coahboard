@@ -12,6 +12,7 @@ using CoachBoard.Application.Mapping; // MappingProfile
 using CoachBoard.Application.Validators; // CoachCreateDtoValidator
 using CoachBoard.Infrastructure.Persistence;
 using CoachBoard.Infrastructure.Repositories;
+using CoachBoard.Infrastructure.Payment;
 // FluentValidation
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -181,6 +182,9 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
 builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
 builder.Services.AddScoped<IFeatureFlags, FeatureFlagsService>();
+
+builder.Services.Configure<MercadoPagoOptions>(builder.Configuration.GetSection(MercadoPagoOptions.SectionName));
+builder.Services.AddHttpClient<IMercadoPagoClient, MercadoPagoClient>();
 
 var app = builder.Build();
 
