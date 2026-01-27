@@ -132,6 +132,13 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         db.Coaches.AddRange(coachA, coachB);
         db.Exercises.Add(exercise);
         db.Clients.AddRange(clientA, clientB);
+
+        // Seed Feature Flags
+        var flagA = new Domain.Entities.FeatureFlag { Id = 1, Name = "feature.export_routine", IsEnabled = true, TenantId = 10 };
+        // Tenant B will not have the flag, simulating disabled/missing
+        
+        db.FeatureFlags.Add(flagA);
+
         db.SaveChanges();
         Console.WriteLine($"Seeded userA: {userA.Email}, Hash: {userA.PasswordHash}");
     }

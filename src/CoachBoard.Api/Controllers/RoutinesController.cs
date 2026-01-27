@@ -20,13 +20,15 @@ public class RoutinesController : ControllerBase
     private readonly IPlanLimitsProvider _limits;
     private readonly ITenantRepository _tenantRepo;
     private readonly ICurrentTenant _currentTenant;
+    private readonly IFeatureFlags _featureFlags;
 
-    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant)
+    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant, IFeatureFlags featureFlags)
     {
         _repo = repo; _clientRepo = clientRepo; _exerciseRepo = exerciseRepo; _mapper = mapper;
         _limits = limits;
         _tenantRepo = tenantRepo;
         _currentTenant = currentTenant;
+        _featureFlags = featureFlags;
     }
 
     // GET /api/routines?clientId=1&page=1&pageSize=20&q=pecho
@@ -47,6 +49,23 @@ public class RoutinesController : ControllerBase
     {
         var routine = await _repo.GetWithItemsAsync(id);
         return routine is null ? NotFound() : Ok(_mapper.Map<RoutineReadDto>(routine));
+    }
+
+    [HttpGet("{id:int}/export")]
+    [Authorize(Roles = "Coach,Admin")]
+    public async Task<IActionResult> Export(int id)
+    {
+        if (!await _featureFlags.IsEnabledAsync("feature.export_routine"))
+        {
+            return StatusCode(403, "Feature 'feature.export_routine' is not enabled for this tenant.");
+        }
+
+        var routine = await _repo.GetWithItemsAsync(id);
+        if (routine is null) return NotFound();
+        
+        // Simulating export content
+        var content = $"Export for Routine {routine.Title} (Client: {routine.Client?.FullName ?? "Unknown"})";
+        return File(System.Text.Encoding.UTF8.GetBytes(content), "text/plain", $"routine_{id}.txt");
     }
 
     [HttpPost]
