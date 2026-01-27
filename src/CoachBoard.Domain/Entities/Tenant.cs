@@ -8,4 +8,5 @@ public class Tenant
     public string Name { get; set; } = null!;
     public SubscriptionPlan Plan { get; set; } = SubscriptionPlan.Free;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<Subscription> Subscriptions { get; set; } = new List<Subscription>();
 }

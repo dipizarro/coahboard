@@ -17,6 +17,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
+    public DbSet<Subscription> Subscriptions => Set<Subscription>();
 
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -186,6 +187,25 @@ public class CoachBoardDbContext : DbContext
             e.HasIndex(x => new { x.TenantId, x.Name }).IsUnique();
         });
 
+
+
+
+
+
+        // Subscription
+        modelBuilder.Entity<Subscription>(e =>
+        {
+            e.ToTable("Subscriptions");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.Provider).IsRequired().HasMaxLength(50);
+            e.Property(x => x.ProviderSubscriptionId).IsRequired().HasMaxLength(100);
+            e.Property(x => x.Status).IsRequired().HasConversion<string>();
+
+            e.HasOne(x => x.Tenant)
+                .WithMany(t => t.Subscriptions)
+                .HasForeignKey(x => x.TenantId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
 
 		base.OnModelCreating(modelBuilder);
     }
