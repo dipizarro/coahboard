@@ -4,6 +4,7 @@ using AutoMapper;
 using CoachBoard.Application.Interfaces;
 using CoachBoard.Application.DTOs;
 using CoachBoard.Domain.Entities;
+using CoachBoard.Api.Filters;
 
 namespace CoachBoard.Api.Controllers;
 
@@ -53,6 +54,7 @@ public class RoutinesController : ControllerBase
 
     [HttpGet("{id:int}/export")]
     [Authorize(Roles = "Coach,Admin")]
+    [RequirePro]
     public async Task<IActionResult> Export(int id)
     {
         if (!await _featureFlags.IsEnabledAsync("feature.export_routine"))

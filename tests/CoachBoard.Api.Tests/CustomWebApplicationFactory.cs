@@ -133,6 +133,25 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         db.Exercises.Add(exercise);
         db.Clients.AddRange(clientA, clientB);
 
+        // Seed Subscriptions (Active for both to pass Pro Gating)
+        var subA = new Domain.Entities.Subscription
+        {
+            TenantId = 10,
+            Provider = "MP",
+            ProviderSubscriptionId = "sub_A",
+            Status = Domain.Enums.SubscriptionStatus.Active,
+            CreatedAt = DateTime.UtcNow
+        };
+        var subB = new Domain.Entities.Subscription
+        {
+            TenantId = 11,
+            Provider = "MP",
+            ProviderSubscriptionId = "sub_B",
+            Status = Domain.Enums.SubscriptionStatus.Active,
+            CreatedAt = DateTime.UtcNow
+        };
+        db.Subscriptions.AddRange(subA, subB);
+
         // Seed Feature Flags
         var flagA = new Domain.Entities.FeatureFlag { Id = 1, Name = "feature.export_routine", IsEnabled = true, TenantId = 10 };
         // Tenant B will not have the flag, simulating disabled/missing

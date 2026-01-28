@@ -182,6 +182,7 @@ builder.Services.AddScoped<ICurrentUserService, CurrentUserService>();
 builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
 builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
 builder.Services.AddScoped<IFeatureFlags, FeatureFlagsService>();
+builder.Services.AddScoped<IBillingAccessService, BillingAccessService>();
 
 builder.Services.Configure<MercadoPagoOptions>(builder.Configuration.GetSection(MercadoPagoOptions.SectionName));
 builder.Services.AddHttpClient<IMercadoPagoClient, MercadoPagoClient>();
