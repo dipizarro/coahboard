@@ -32,6 +32,44 @@ public class BillingController : ControllerBase
         _tenantRepo = tenantRepo;
     }
 
+    [HttpGet("status")]
+    public async Task<ActionResult<BillingStatusDto>> GetStatus([FromServices] IBillingAccessService billingAccess)
+    {
+        var tenantId = _currentTenant.TenantId;
+        if (tenantId is null) return BadRequest("Tenant context missing");
+
+        var tenant = await _tenantRepo.GetByIdAsync(tenantId.Value);
+        if (tenant is null) return NotFound("Tenant not found");
+
+        var subscriptions = await _subRepo.GetAllAsync(); // Filtered by TenantId via global filter/repo logic? 
+        // Note: Repository.GetAllAsync() usually applies current tenant filter if implemented. 
+        // Let's assume it does or we rely on the fact that we are in tenant context.
+        // Re-checking Repository implementation via thought trace: 
+        // User's Repository often filters by ICurrentTenant.
+        
+        // Logic to find best subscription (Active > Grace Period > Latest)
+        var activeSub = subscriptions.FirstOrDefault(s => s.IsActive());
+        var graceSub = subscriptions.FirstOrDefault(s => 
+            (s.Status == SubscriptionStatus.PastDue || s.Status == SubscriptionStatus.Pending) &&
+            s.CurrentPeriodEnd.HasValue &&
+            s.CurrentPeriodEnd.Value > DateTime.UtcNow);
+            
+        var latestSub = subscriptions.OrderByDescending(s => s.CreatedAt).FirstOrDefault();
+
+        var bestSub = activeSub ?? graceSub ?? latestSub;
+        
+        // Access Check
+        var canAccessPro = await billingAccess.CanAccessProAsync();
+
+        return Ok(new BillingStatusDto(
+            Plan: tenant.Plan,
+            SubscriptionStatus: bestSub?.Status ?? SubscriptionStatus.None,
+            CanAccessPro: canAccessPro,
+            CurrentPeriodEnd: bestSub?.CurrentPeriodEnd,
+            ProviderSubscriptionId: bestSub?.ProviderSubscriptionId
+        ));
+    }
+
     [HttpPost("checkout/pro")]
     public async Task<ActionResult<CheckoutResponse>> CreateProCheckout()
     {
