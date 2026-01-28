@@ -59,7 +59,7 @@ public class BillingControllerTests
         _currentTenantMock.Setup(x => x.TenantId).Returns(tenantId);
         _currentUserMock.Setup(x => x.UserId).Returns(userId);
         
-        _mpClientMock.Setup(x => x.CreateProCheckoutAsync(userId, It.IsAny<string>(), tenantId))
+        _mpClientMock.Setup(x => x.CreateProCheckoutAsync(userId, It.IsAny<string>(), tenantId, It.IsAny<string>()))
             .ReturnsAsync(expectedUrl);
 
         // Act

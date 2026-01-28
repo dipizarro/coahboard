@@ -45,14 +45,13 @@ public class BillingController : ControllerBase
         // Let's use a placeholder for now as email isn't critical for the STUB.
         var userEmail = "user@example.com"; 
 
-        // 1. Get Checkout URL from Provider
-        var initPoint = await _mpClient.CreateProCheckoutAsync(userId ?? 0, userEmail, tenantId.Value);
-
-        // 2. Create Pending Subscription Record
-        // We'll generate a temporary reference ID or use one from MP if available.
-        // For this flow, we assume MP logic might return a preference ID, but our interface just returns URL for simplicity.
-        // We'll treat the URL as the reference for the stub or generate a unique one.
+        // 1. Generate Reference ID first
         var referenceId = Guid.NewGuid().ToString(); 
+
+        // 2. Get Checkout URL from Provider
+        var initPoint = await _mpClient.CreateProCheckoutAsync(userId ?? 0, userEmail, tenantId.Value, referenceId);
+
+        // 3. Create Pending Subscription Record 
 
         var subscription = new Subscription
         {
