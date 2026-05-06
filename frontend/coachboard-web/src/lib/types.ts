@@ -71,6 +71,41 @@ export type Routine = {
   items: RoutineItem[]
 }
 
+export type ClientProgressRecord = {
+  id: number
+  clientId: number
+  recordedAt: string
+  weightKg?: number | null
+  heightCm?: number | null
+  bodyFatPercentage?: number | null
+  chestCm?: number | null
+  waistCm?: number | null
+  hipCm?: number | null
+  leftArmCm?: number | null
+  rightArmCm?: number | null
+  leftThighCm?: number | null
+  rightThighCm?: number | null
+  restingHeartRate?: number | null
+  notes?: string | null
+  createdAt?: string
+}
+
+export type ClientProgressPayload = {
+  recordedAt: string
+  weightKg?: number | null
+  heightCm?: number | null
+  bodyFatPercentage?: number | null
+  chestCm?: number | null
+  waistCm?: number | null
+  hipCm?: number | null
+  leftArmCm?: number | null
+  rightArmCm?: number | null
+  leftThighCm?: number | null
+  rightThighCm?: number | null
+  restingHeartRate?: number | null
+  notes?: string | null
+}
+
 export type SessionStatus = 'Planned' | 'Done' | 'Canceled' | 'Missed'
 export type SessionType = 'Training' | 'PersonalBlock' | 'Other'
 

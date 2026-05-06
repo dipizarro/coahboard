@@ -4,6 +4,7 @@ import Register from '../pages/Register'
 import Dashboard from '../pages/Dashboard'
 import AthletesList from '../pages/AthletesList'
 import AthleteForm from '../pages/AthleteForm'
+import AthleteProfile from '../pages/AthleteProfile'
 import ExercisesList from '../pages/ExercisesList'
 import ExerciseForm from '../pages/ExerciseForm'
 import RoutinesList from '../pages/RoutinesList'
@@ -30,6 +31,7 @@ export default function AppRouter() {
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/athletes" element={<AthletesList />} />
         <Route path="/athletes/new" element={<AthleteForm />} />
+        <Route path="/athletes/:id/profile" element={<AthleteProfile />} />
         <Route path="/athletes/:id" element={<AthleteForm />} />
         <Route path="/athletes/:athleteId/routines" element={<RoutinesList />} />
         <Route path="/athletes/:athleteId/routines/new" element={<RoutineForm />} />

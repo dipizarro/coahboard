@@ -162,10 +162,13 @@ export default function AthletesList() {
                   label: 'Acciones',
                   render: a => (
                     <div className="flex flex-wrap gap-2">
+                      <Link className="btn-primary text-xs" to={`/athletes/${a.id}/profile`}>
+                        Ficha
+                      </Link>
                       <Link className="btn text-xs" to={`/athletes/${a.id}`}>
                         Editar
                       </Link>
-                      <Link className="btn-primary text-xs" to={`/athletes/${a.id}/routines`}>
+                      <Link className="btn text-xs" to={`/athletes/${a.id}/routines`}>
                         Rutinas
                       </Link>
                       {canDelete && (
