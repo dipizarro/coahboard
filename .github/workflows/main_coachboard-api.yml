@@ -1,42 +1,16 @@
-name: Build and deploy ASP.NET Core app to Azure Web App - coachboard-api
+name: Azure deployment disabled - coachboard-api
+
+# Workflow desactivado temporalmente.
+# Motivo: la cuenta/recurso Azure anterior ya no está disponible.
+# Para reactivarlo en el futuro, reconstruir el workflow con el nuevo publish profile
+# o con autenticación OIDC hacia la nueva suscripción Azure.
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - 'src/**'
-      - '.github/workflows/backend-deploy.yml'
   workflow_dispatch:
 
 jobs:
-  build-and-deploy:
+  deployment-disabled:
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup .NET
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 9.x
-
-      - name: Restore dependencies
-        run: dotnet restore ./src/CoachBoard.Api/CoachBoard.Api.csproj
-
-      - name: Build
-        run: dotnet build ./src/CoachBoard.Api/CoachBoard.Api.csproj --configuration Release --no-restore
-
-      - name: Publish
-        run: dotnet publish ./src/CoachBoard.Api/CoachBoard.Api.csproj -c Release -o ./publish --no-build
-
-      - name: Deploy to Azure Web App
-        uses: azure/webapps-deploy@v3
-        with:
-          app-name: 'coachboard-api'
-          slot-name: 'Production'
-          package: ./publish
-          publish-profile: ${{ secrets.AZUREAPPSERVICE_PUBLISHPROFILE }}
+      - name: Azure deployment is disabled
+        run: echo "Azure deployment is currently disabled for CoachBoard."
