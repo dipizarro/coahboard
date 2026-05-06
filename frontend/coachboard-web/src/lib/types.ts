@@ -9,8 +9,18 @@ export type PagedResult<T> = {
 export type Client = {
   id: number | string
   fullName: string
-  email?: string
-  phone?: string
+  email?: string | null
+  phone?: string | null
+  birthDate?: string | null
+  gender?: string | null
+  initialHeightCm?: number | null
+  mainGoal?: string | null
+  experienceLevel?: string | null
+  medicalNotes?: string | null
+  injuryNotes?: string | null
+  generalNotes?: string | null
+  startDate?: string | null
+  isActive: boolean
   coachId: number
   createdAt?: string
 }
@@ -19,8 +29,18 @@ export type Athlete = {
   id: string
   firstName: string
   lastName: string
-  email?: string
-  phone?: string
+  email?: string | null
+  phone?: string | null
+  birthDate?: string | null
+  gender?: string | null
+  initialHeightCm?: number | null
+  mainGoal?: string | null
+  experienceLevel?: string | null
+  medicalNotes?: string | null
+  injuryNotes?: string | null
+  generalNotes?: string | null
+  startDate?: string | null
+  isActive: boolean
   createdAt?: string
 }
 

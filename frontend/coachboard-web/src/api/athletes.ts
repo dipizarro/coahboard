@@ -9,6 +9,16 @@ function toAthlete(c: Client): Athlete {
     lastName: rest.join(' ') || '',
     email: c.email,
     phone: c.phone,
+    birthDate: c.birthDate,
+    gender: c.gender,
+    initialHeightCm: c.initialHeightCm,
+    mainGoal: c.mainGoal,
+    experienceLevel: c.experienceLevel,
+    medicalNotes: c.medicalNotes,
+    injuryNotes: c.injuryNotes,
+    generalNotes: c.generalNotes,
+    startDate: c.startDate,
+    isActive: c.isActive,
     createdAt: c.createdAt,
   }
 }
@@ -50,6 +60,16 @@ export async function create(p: Partial<Athlete>, coachId?: number | null) {
     fullName,
     email: p.email,
     phone: p.phone,
+    birthDate: p.birthDate,
+    gender: p.gender,
+    initialHeightCm: p.initialHeightCm,
+    mainGoal: p.mainGoal,
+    experienceLevel: p.experienceLevel,
+    medicalNotes: p.medicalNotes,
+    injuryNotes: p.injuryNotes,
+    generalNotes: p.generalNotes,
+    startDate: p.startDate,
+    isActive: p.isActive ?? true,
     coachId: ensureCoachId(coachId),
   }
   const { data } = await api.post<Client>('/api/Clients', payload)
@@ -62,8 +82,18 @@ export async function update(id: string, p: Partial<Athlete>, coachId?: number |
     fullName,
     email: p.email,
     phone: p.phone,
-    coachId: ensureCoachId(coachId),
+    birthDate: p.birthDate,
+    gender: p.gender,
+    initialHeightCm: p.initialHeightCm,
+    mainGoal: p.mainGoal,
+    experienceLevel: p.experienceLevel,
+    medicalNotes: p.medicalNotes,
+    injuryNotes: p.injuryNotes,
+    generalNotes: p.generalNotes,
+    startDate: p.startDate,
+    isActive: p.isActive ?? true,
   }
+  ensureCoachId(coachId)
   const { data } = await api.put<Client>(`/api/Clients/${id}`, payload)
   return toAthlete(data)
 }

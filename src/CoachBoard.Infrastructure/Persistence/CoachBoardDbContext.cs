@@ -72,6 +72,14 @@ public class CoachBoardDbContext : DbContext
             e.Property(x => x.FullName).IsRequired().HasMaxLength(150);
             e.Property(x => x.Email).HasMaxLength(150);
             e.Property(x => x.Phone).HasMaxLength(30);
+            e.Property(x => x.Gender).HasMaxLength(30);
+            e.Property(x => x.InitialHeightCm).HasColumnType("decimal(5,2)");
+            e.Property(x => x.MainGoal).HasMaxLength(150);
+            e.Property(x => x.ExperienceLevel).HasMaxLength(50);
+            e.Property(x => x.MedicalNotes).HasMaxLength(1000);
+            e.Property(x => x.InjuryNotes).HasMaxLength(1000);
+            e.Property(x => x.GeneralNotes).HasMaxLength(1000);
+            e.Property(x => x.IsActive).IsRequired().HasDefaultValue(true);
             e.HasOne(x => x.Coach)
                 .WithMany(c => c.Clients)
                 .HasForeignKey(x => x.CoachId)
