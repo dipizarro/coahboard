@@ -84,17 +84,8 @@ public class TenantIsolationIntegrationTests : BaseIntegrationTest
         getByIdResponse.StatusCode.Should().Be(HttpStatusCode.NotFound);
 
         // 5. Attempt to GET all Routines for Client 10 -> Expect 403 Forbidden (Controller checks if Client belongs to Coach)
-        // Note: Coach B (User B) doesn't own Client 10.
         var getByClientResponse = await Client.GetAsync("/api/routines?clientId=10");
-        // Looking at RoutinesController.Get, there isn't an explicit "Coach B owns Client 10" check in the GET routines list?
-        // Wait, RoutinesController.Get calls _repo.GetByClientAsync(clientId...).
-        // But Client 10 belongs to Tenant 10, and User B is Tenant 11.
-        // The repository tenant filter will apply, so User B (Tenant 11) won't find Client 10 if we have isolation there.
-        // Actually, RoutinesController doesn't check ownership of ClientId manually like ClientsController does.
-        // However, the RoutineRepository will filter Routines by TenantId 11, so it will return empty list.
-        getByClientResponse.StatusCode.Should().Be(HttpStatusCode.OK); // List endpoint usually returns 200 even if empty
-        var result = await getByClientResponse.Content.ReadFromJsonAsync<PagedResult<RoutineReadDto>>();
-        result!.Items.Should().BeEmpty();
+        getByClientResponse.StatusCode.Should().Be(HttpStatusCode.Forbidden);
 
         // 6. Authenticate back as User A
         await AuthenticateAsUserAAsync();
@@ -104,6 +95,105 @@ public class TenantIsolationIntegrationTests : BaseIntegrationTest
         getByIdSuccessResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var finalRoutine = await getByIdSuccessResponse.Content.ReadFromJsonAsync<RoutineReadDto>();
         finalRoutine!.Title.Should().Be("Routine A");
+    }
+
+    [Fact]
+    public async Task GetRoutines_WhenClientBelongsToAnotherCoachInSameTenant_ReturnsForbidden()
+    {
+        var (clientId, _) = await CreateRoutineForAnotherCoachInTenantAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.GetAsync($"/api/routines?clientId={clientId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetRoutineById_WhenRoutineBelongsToAnotherCoachInSameTenant_ReturnsForbidden()
+    {
+        var (_, routineId) = await CreateRoutineForAnotherCoachInTenantAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.GetAsync($"/api/routines/{routineId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task CreateRoutine_WhenClientBelongsToAnotherCoachInSameTenant_ReturnsForbidden()
+    {
+        var (clientId, _) = await CreateRoutineForAnotherCoachInTenantAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var dto = new RoutineCreateDto(
+            "Cross Coach Create",
+            clientId,
+            new List<RoutineItemDto> { new RoutineItemDto(10, 3, 10, 1, "Notes") });
+
+        var response = await Client.PostAsJsonAsync("/api/routines", dto);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task UpdateRoutine_WhenRoutineBelongsToAnotherCoachInSameTenant_ReturnsForbidden()
+    {
+        var (_, routineId) = await CreateRoutineForAnotherCoachInTenantAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var dto = new RoutineUpdateDto(
+            "Cross Coach Update",
+            new List<RoutineItemDto> { new RoutineItemDto(10, 4, 8, 1, "Updated") });
+
+        var response = await Client.PutAsJsonAsync($"/api/routines/{routineId}", dto);
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task DeleteRoutine_WhenRoutineBelongsToAnotherCoachInSameTenant_ReturnsForbidden()
+    {
+        var (_, routineId) = await CreateRoutineForAnotherCoachInTenantAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.DeleteAsync($"/api/routines/{routineId}");
+
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    private async Task<(int ClientId, int RoutineId)> CreateRoutineForAnotherCoachInTenantAAsync()
+    {
+        var suffix = Guid.NewGuid().ToString("N");
+
+        var coach = new Coach
+        {
+            Name = $"Other Coach {suffix}",
+            Specialty = "General",
+            TenantId = 10
+        };
+        Db.Coaches.Add(coach);
+        await Db.SaveChangesAsync();
+
+        var client = new Client
+        {
+            FullName = $"Other Coach Client {suffix}",
+            Email = $"other-client-{suffix}@test.local",
+            CoachId = coach.Id,
+            TenantId = 10
+        };
+        Db.Clients.Add(client);
+        await Db.SaveChangesAsync();
+
+        var routine = new Routine
+        {
+            Title = $"Other Coach Routine {suffix}",
+            ClientId = client.Id,
+            TenantId = 10
+        };
+        Db.Routines.Add(routine);
+        await Db.SaveChangesAsync();
+
+        return (client.Id, routine.Id);
     }
 }
 

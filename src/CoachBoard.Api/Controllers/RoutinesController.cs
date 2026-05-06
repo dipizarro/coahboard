@@ -22,14 +22,16 @@ public class RoutinesController : ControllerBase
     private readonly ITenantRepository _tenantRepo;
     private readonly ICurrentTenant _currentTenant;
     private readonly IFeatureFlags _featureFlags;
+    private readonly ICurrentUserService _currentUser;
 
-    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant, IFeatureFlags featureFlags)
+    public RoutinesController(IRoutineRepository repo, IClientRepository clientRepo, IExerciseRepository exerciseRepo, IMapper mapper, IPlanLimitsProvider limits, ITenantRepository tenantRepo, ICurrentTenant currentTenant, IFeatureFlags featureFlags, ICurrentUserService currentUser)
     {
         _repo = repo; _clientRepo = clientRepo; _exerciseRepo = exerciseRepo; _mapper = mapper;
         _limits = limits;
         _tenantRepo = tenantRepo;
         _currentTenant = currentTenant;
         _featureFlags = featureFlags;
+        _currentUser = currentUser;
     }
 
     // GET /api/routines?clientId=1&page=1&pageSize=20&q=pecho
@@ -38,6 +40,9 @@ public class RoutinesController : ControllerBase
     public async Task<ActionResult<PagedResult<RoutineReadDto>>> Get([FromQuery] int clientId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, [FromQuery] string? q = null)
     {
         if (clientId <= 0) return BadRequest("clientId es requerido y > 0");
+
+        if (!await CurrentCoachCanAccessClientAsync(clientId)) return Forbid();
+
         var items = await _repo.GetByClientAsync(clientId, page <= 0 ? 1 : page, pageSize <= 0 ? 20 : pageSize, q);
         var total = await _repo.CountByClientAsync(clientId, q);
         var dto = _mapper.Map<IEnumerable<RoutineReadDto>>(items);
@@ -49,7 +54,11 @@ public class RoutinesController : ControllerBase
     public async Task<ActionResult<RoutineReadDto>> GetById(int id)
     {
         var routine = await _repo.GetWithItemsAsync(id);
-        return routine is null ? NotFound() : Ok(_mapper.Map<RoutineReadDto>(routine));
+        if (routine is null) return NotFound();
+
+        if (!await CurrentCoachCanAccessClientAsync(routine.ClientId)) return Forbid();
+
+        return Ok(_mapper.Map<RoutineReadDto>(routine));
     }
 
     [HttpGet("{id:int}/export")]
@@ -64,6 +73,8 @@ public class RoutinesController : ControllerBase
 
         var routine = await _repo.GetWithItemsAsync(id);
         if (routine is null) return NotFound();
+
+        if (!await CurrentCoachCanAccessClientAsync(routine.ClientId)) return Forbid();
         
         // Simulating export content
         var content = $"Export for Routine {routine.Title} (Client: {routine.Client?.FullName ?? "Unknown"})";
@@ -77,6 +88,8 @@ public class RoutinesController : ControllerBase
         // validar client
         var client = await _clientRepo.GetByIdAsync(input.ClientId);
         if (client is null) return BadRequest("ClientId inválido.");
+
+        if (!CurrentCoachCanAccessClient(client)) return Forbid();
 
         // Check Plan Limits
         var tenantId = _currentTenant.TenantId ?? 0;
@@ -132,6 +145,8 @@ public class RoutinesController : ControllerBase
         var routine = await _repo.GetByIdAsync(id);
         if (routine is null) return NotFound();
 
+        if (!await CurrentCoachCanAccessClientAsync(routine.ClientId)) return Forbid();
+
         _mapper.Map(input, routine);
         await _repo.UpdateAsync(routine);
 
@@ -167,8 +182,27 @@ public class RoutinesController : ControllerBase
         var routine = await _repo.GetByIdAsync(id);
         if (routine is null) return NotFound();
 
+        if (!await CurrentCoachCanAccessClientAsync(routine.ClientId)) return Forbid();
+
         await _repo.DeleteAsync(routine);
         await _repo.SaveChangesAsync();
         return NoContent();
+    }
+
+    private async Task<bool> CurrentCoachCanAccessClientAsync(int clientId)
+    {
+        if (!_currentUser.IsCoach) return true;
+
+        var client = await _clientRepo.GetByIdAsync(clientId);
+        if (client is null) return false;
+
+        return CurrentCoachCanAccessClient(client);
+    }
+
+    private bool CurrentCoachCanAccessClient(Client client)
+    {
+        if (!_currentUser.IsCoach) return true;
+
+        return _currentUser.CoachId is not null && client.CoachId == _currentUser.CoachId.Value;
     }
 }
