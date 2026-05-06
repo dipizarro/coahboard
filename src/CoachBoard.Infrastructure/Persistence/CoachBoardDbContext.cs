@@ -15,6 +15,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<Routine> Routines => Set<Routine>();
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
     public DbSet<Session> Sessions => Set<Session>();
+    public DbSet<ClientProgressRecord> ClientProgressRecords => Set<ClientProgressRecord>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
@@ -88,6 +89,31 @@ public class CoachBoardDbContext : DbContext
 
             e.Property(x => x.TenantId).HasDefaultValue(1);
             e.HasOne(x => x.Tenant).WithMany().HasForeignKey(x => x.TenantId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ClientProgressRecord>(e =>
+        {
+            e.ToTable("ClientProgressRecords");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.RecordedAt).IsRequired();
+            e.Property(x => x.WeightKg).HasColumnType("decimal(6,2)");
+            e.Property(x => x.HeightCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.BodyFatPercentage).HasColumnType("decimal(6,2)");
+            e.Property(x => x.ChestCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.WaistCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.HipCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.LeftArmCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.RightArmCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.LeftThighCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.RightThighCm).HasColumnType("decimal(6,2)");
+            e.Property(x => x.Notes).HasMaxLength(1000);
+
+            e.HasOne(x => x.Client)
+                .WithMany(c => c.ProgressRecords)
+                .HasForeignKey(x => x.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(x => new { x.ClientId, x.RecordedAt });
         });
 
         // Exercise

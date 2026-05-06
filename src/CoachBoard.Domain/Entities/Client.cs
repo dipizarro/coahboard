@@ -21,6 +21,7 @@ public class Client : ITenantEntity
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     public ICollection<Routine> Routines { get; set; }
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
+    public ICollection<ClientProgressRecord> ProgressRecords { get; set; } = new List<ClientProgressRecord>();
 
     public int TenantId { get; set; }
     public Tenant? Tenant { get; set; }

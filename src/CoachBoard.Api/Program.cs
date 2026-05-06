@@ -74,6 +74,8 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IJwtService,
                            CoachBoard.Infrastructure.Auth.JwtService>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientRepository,
                            CoachBoard.Infrastructure.Repositories.ClientRepository>();
+builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientProgressRepository,
+                           CoachBoard.Infrastructure.Repositories.ClientProgressRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseRepository,
                            CoachBoard.Infrastructure.Repositories.ExerciseRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,

@@ -16,6 +16,12 @@ public class MappingProfile : Profile
         CreateMap<ClientUpdateDto, Client>();
         CreateMap<Client, ClientReadDto>();
 
+        CreateMap<ClientProgressCreateDto, ClientProgressRecord>();
+        CreateMap<ClientProgressUpdateDto, ClientProgressRecord>()
+            .ForMember(d => d.ClientId, m => m.Ignore())
+            .ForMember(d => d.CreatedAt, m => m.Ignore());
+        CreateMap<ClientProgressRecord, ClientProgressReadDto>();
+
         // Exercises
         CreateMap<ExerciseCreateDto, Exercise>();
         CreateMap<ExerciseUpdateDto, Exercise>();
