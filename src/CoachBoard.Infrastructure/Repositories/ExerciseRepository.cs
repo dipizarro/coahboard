@@ -9,21 +9,23 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
 {
     public ExerciseRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
-    public async Task<IEnumerable<Exercise>> SearchAsync(string? q, string? category, int page, int pageSize, bool includeAll, int? coachId)
+    public async Task<IEnumerable<Exercise>> SearchAsync(
+        string? q,
+        string? category,
+        string? targetMuscleGroup,
+        string? equipment,
+        string? difficultyLevel,
+        string? exerciseType,
+        string? environment,
+        string? tag,
+        int page,
+        int pageSize,
+        bool includeAll,
+        int? coachId)
     {
         var query = _context.Exercises.AsNoTracking().AsQueryable();
         query = ApplyVisibility(query, includeAll, coachId);
-
-        if (!string.IsNullOrWhiteSpace(q))
-        {
-            var term = q.Trim().ToLower();
-            query = query.Where(e => e.Name.ToLower().Contains(term));
-        }
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            var cat = category.Trim().ToLower();
-            query = query.Where(e => e.Category.ToLower() == cat);
-        }
+        query = ApplyFilters(query, q, category, targetMuscleGroup, equipment, difficultyLevel, exerciseType, environment, tag);
 
         return await query
             .OrderBy(e => e.Name)
@@ -32,23 +34,88 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
             .ToListAsync();
     }
 
-    public async Task<int> CountAsync(string? q, string? category, bool includeAll, int? coachId)
+    public async Task<int> CountAsync(
+        string? q,
+        string? category,
+        string? targetMuscleGroup,
+        string? equipment,
+        string? difficultyLevel,
+        string? exerciseType,
+        string? environment,
+        string? tag,
+        bool includeAll,
+        int? coachId)
     {
         var query = _context.Exercises.AsQueryable();
         query = ApplyVisibility(query, includeAll, coachId);
+        query = ApplyFilters(query, q, category, targetMuscleGroup, equipment, difficultyLevel, exerciseType, environment, tag);
 
+        return await query.CountAsync();
+    }
+
+    private static IQueryable<Exercise> ApplyFilters(
+        IQueryable<Exercise> query,
+        string? q,
+        string? category,
+        string? targetMuscleGroup,
+        string? equipment,
+        string? difficultyLevel,
+        string? exerciseType,
+        string? environment,
+        string? tag)
+    {
         if (!string.IsNullOrWhiteSpace(q))
         {
             var term = q.Trim().ToLower();
-            query = query.Where(e => e.Name.ToLower().Contains(term));
-        }
-        if (!string.IsNullOrWhiteSpace(category))
-        {
-            var cat = category.Trim().ToLower();
-            query = query.Where(e => e.Category.ToLower() == cat);
+            query = query.Where(e =>
+                e.Name.ToLower().Contains(term)
+                || (e.Description != null && e.Description.ToLower().Contains(term))
+                || (e.Tags != null && e.Tags.ToLower().Contains(term)));
         }
 
-        return await query.CountAsync();
+        if (!string.IsNullOrWhiteSpace(category))
+        {
+            var value = category.Trim().ToLower();
+            query = query.Where(e => e.Category.ToLower() == value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(targetMuscleGroup))
+        {
+            var value = targetMuscleGroup.Trim().ToLower();
+            query = query.Where(e => e.TargetMuscleGroup != null && e.TargetMuscleGroup.ToLower().Contains(value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(equipment))
+        {
+            var value = equipment.Trim().ToLower();
+            query = query.Where(e => e.Equipment != null && e.Equipment.ToLower().Contains(value));
+        }
+
+        if (!string.IsNullOrWhiteSpace(difficultyLevel))
+        {
+            var value = difficultyLevel.Trim().ToLower();
+            query = query.Where(e => e.DifficultyLevel != null && e.DifficultyLevel.ToLower() == value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(exerciseType))
+        {
+            var value = exerciseType.Trim().ToLower();
+            query = query.Where(e => e.ExerciseType != null && e.ExerciseType.ToLower() == value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(environment))
+        {
+            var value = environment.Trim().ToLower();
+            query = query.Where(e => e.Environment != null && e.Environment.ToLower() == value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(tag))
+        {
+            var value = tag.Trim().ToLower();
+            query = query.Where(e => e.Tags != null && e.Tags.ToLower().Contains(value));
+        }
+
+        return query;
     }
 
     private static IQueryable<Exercise> ApplyVisibility(IQueryable<Exercise> query, bool includeAll, int? coachId)

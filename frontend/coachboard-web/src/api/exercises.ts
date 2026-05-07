@@ -28,10 +28,38 @@ export async function search(params: {
   pageSize?: number
   q?: string
   category?: string
+  targetMuscleGroup?: string
+  equipment?: string
+  difficultyLevel?: string
+  exerciseType?: string
+  environment?: string
+  tag?: string
 }): Promise<PagedResult<Exercise>> {
-  const { page = 1, pageSize = 20, q, category } = params
+  const {
+    page = 1,
+    pageSize = 20,
+    q,
+    category,
+    targetMuscleGroup,
+    equipment,
+    difficultyLevel,
+    exerciseType,
+    environment,
+    tag,
+  } = params
   const { data } = await api.get<PagedResult<Exercise>>('/api/Exercises', {
-    params: { page, pageSize, q, category },
+    params: {
+      page,
+      pageSize,
+      q,
+      category,
+      targetMuscleGroup,
+      equipment,
+      difficultyLevel,
+      exerciseType,
+      environment,
+      tag,
+    },
   })
   return data
 }
@@ -55,4 +83,3 @@ export async function update(
 }
 
 export const remove = async (id: number) => (await api.delete(`/api/Exercises/${id}`)).data
-

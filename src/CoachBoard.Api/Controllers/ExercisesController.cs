@@ -33,13 +33,45 @@ public class ExercisesController : ControllerBase
     // GET /api/exercises?q=press&category=fuerza&page=1&pageSize=20
     [HttpGet]
     [AllowAnonymous]
-    public async Task<ActionResult<PagedResult<ExerciseReadDto>>> Search([FromQuery] string? q, [FromQuery] string? category, [FromQuery] int page = 1, [FromQuery] int pageSize = 20)
+    public async Task<ActionResult<PagedResult<ExerciseReadDto>>> Search(
+        [FromQuery] string? q,
+        [FromQuery] string? category,
+        [FromQuery] string? targetMuscleGroup,
+        [FromQuery] string? equipment,
+        [FromQuery] string? difficultyLevel,
+        [FromQuery] string? exerciseType,
+        [FromQuery] string? environment,
+        [FromQuery] string? tag,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
     {
         page = page <= 0 ? 1 : page;
         pageSize = pageSize <= 0 ? 20 : pageSize;
 
-        var items = await _repo.SearchAsync(q, category, page, pageSize, _currentUser.IsAdmin, CurrentCoachIdOrNull());
-        var total = await _repo.CountAsync(q, category, _currentUser.IsAdmin, CurrentCoachIdOrNull());
+        var items = await _repo.SearchAsync(
+            q,
+            category,
+            targetMuscleGroup,
+            equipment,
+            difficultyLevel,
+            exerciseType,
+            environment,
+            tag,
+            page,
+            pageSize,
+            _currentUser.IsAdmin,
+            CurrentCoachIdOrNull());
+        var total = await _repo.CountAsync(
+            q,
+            category,
+            targetMuscleGroup,
+            equipment,
+            difficultyLevel,
+            exerciseType,
+            environment,
+            tag,
+            _currentUser.IsAdmin,
+            CurrentCoachIdOrNull());
         var dto = _mapper.Map<IEnumerable<ExerciseReadDto>>(items);
 
         return Ok(new PagedResult<ExerciseReadDto>(dto, total, page, pageSize));

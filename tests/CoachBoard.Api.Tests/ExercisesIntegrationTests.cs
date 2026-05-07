@@ -197,6 +197,91 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
         assigned.CoachId.Should().Be(10);
     }
 
+    [Fact]
+    public async Task Search_WithAdvancedFilters_ReturnsMatchingVisibleExercises()
+    {
+        Db.Exercises.AddRange(
+            new Exercise
+            {
+                Name = "Press inclinado con mancuernas",
+                Category = "Fuerza",
+                CoachId = 10,
+                IsGlobal = false,
+                Description = "Trabajo de empuje para pectoral superior.",
+                DifficultyLevel = "Intermedio",
+                Equipment = "Mancuernas",
+                TargetMuscleGroup = "Pectoral",
+                ExerciseType = "Fuerza",
+                Environment = "Gimnasio",
+                Tags = "empuje,pecho,hipertrofia"
+            },
+            new Exercise
+            {
+                Name = "Press en máquina",
+                Category = "Fuerza",
+                CoachId = 10,
+                IsGlobal = false,
+                Description = "Empuje guiado.",
+                DifficultyLevel = "Inicial",
+                Equipment = "Máquina",
+                TargetMuscleGroup = "Pectoral",
+                ExerciseType = "Fuerza",
+                Environment = "Gimnasio",
+                Tags = "pecho"
+            },
+            new Exercise
+            {
+                Name = "Zancadas al aire libre",
+                Category = "Fuerza",
+                CoachId = 10,
+                IsGlobal = false,
+                DifficultyLevel = "Inicial",
+                Equipment = "Peso corporal",
+                TargetMuscleGroup = "Piernas",
+                ExerciseType = "Fuerza",
+                Environment = "Exterior",
+                Tags = "piernas"
+            });
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.GetAsync("/api/exercises?q=hipertrofia&category=Fuerza&targetMuscleGroup=pectoral&equipment=mancuerna&difficultyLevel=Intermedio&exerciseType=Fuerza&environment=Gimnasio&tag=empuje&page=1&pageSize=20");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var result = await response.Content.ReadFromJsonAsync<PagedResult<ExerciseReadDto>>();
+        result.Should().NotBeNull();
+        result!.Items.Should().ContainSingle();
+        result.Items.Single().Name.Should().Be("Press inclinado con mancuernas");
+    }
+
+    [Fact]
+    public async Task Search_WhenQMatchesDescriptionOrTags_ReturnsExercise()
+    {
+        Db.Exercises.Add(new Exercise
+        {
+            Name = "Curl alterno",
+            Category = "Fuerza",
+            CoachId = 10,
+            IsGlobal = false,
+            Description = "Trabajo estricto de flexión de codo.",
+            Tags = "brazo,biceps"
+        });
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        var descriptionResponse = await Client.GetAsync("/api/exercises?q=codo&page=1&pageSize=20");
+        var tagsResponse = await Client.GetAsync("/api/exercises?q=biceps&page=1&pageSize=20");
+
+        descriptionResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        tagsResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var descriptionResult = await descriptionResponse.Content.ReadFromJsonAsync<PagedResult<ExerciseReadDto>>();
+        var tagsResult = await tagsResponse.Content.ReadFromJsonAsync<PagedResult<ExerciseReadDto>>();
+        descriptionResult!.Items.Should().Contain(x => x.Name == "Curl alterno");
+        tagsResult!.Items.Should().Contain(x => x.Name == "Curl alterno");
+    }
+
     private async Task<Exercise> CreateExerciseForAnotherCoachInTenantAAsync()
     {
         var suffix = Guid.NewGuid().ToString("N");

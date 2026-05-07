@@ -8,6 +8,10 @@ import EmptyState from '../components/EmptyState'
 import Loader from '../components/Loader'
 
 const CATEGORIES = ['Fuerza', 'Cardio', 'Movilidad', 'Flexibilidad', 'General']
+const MUSCLE_GROUPS = ['Pectoral', 'Espalda', 'Hombros', 'Brazos', 'Core', 'Piernas', 'Glúteos']
+const EQUIPMENT = ['Peso corporal', 'Mancuernas', 'Barra', 'Kettlebell', 'Máquina', 'Banda elástica', 'TRX']
+const DIFFICULTIES = ['Inicial', 'Intermedio', 'Avanzado']
+const ENVIRONMENTS = ['Gimnasio', 'Casa', 'Exterior']
 
 export default function ExercisesList() {
   const [pagedData, setPagedData] = useState<PagedResult<Exercise> | null>(null)
@@ -17,17 +21,51 @@ export default function ExercisesList() {
   const [deletingId, setDeletingId] = useState<number | null>(null)
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCategory, setSelectedCategory] = useState<string>('')
+  const [selectedMuscle, setSelectedMuscle] = useState<string>('')
+  const [selectedEquipment, setSelectedEquipment] = useState<string>('')
+  const [selectedDifficulty, setSelectedDifficulty] = useState<string>('')
+  const [selectedEnvironment, setSelectedEnvironment] = useState<string>('')
+  const [tagFilter, setTagFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const { role } = useAuth()
   const canEdit = role === 'Admin' || role === 'Coach'
 
   const pageSize = 10
 
-  const refresh = (page = 1, q = '', category = '') => {
+  const hasFilters = Boolean(
+    searchQuery
+      || selectedCategory
+      || selectedMuscle
+      || selectedEquipment
+      || selectedDifficulty
+      || selectedEnvironment
+      || tagFilter,
+  )
+
+  const refresh = (
+    page = 1,
+    q = searchQuery,
+    category = selectedCategory,
+    targetMuscleGroup = selectedMuscle,
+    equipment = selectedEquipment,
+    difficultyLevel = selectedDifficulty,
+    environment = selectedEnvironment,
+    tag = tagFilter,
+  ) => {
     setLoading(true)
     setError(null)
     setActionError(null)
-    return search({ page, pageSize, q: q || undefined, category: category || undefined })
+    return search({
+      page,
+      pageSize,
+      q: q || undefined,
+      category: category || undefined,
+      targetMuscleGroup: targetMuscleGroup || undefined,
+      equipment: equipment || undefined,
+      difficultyLevel: difficultyLevel || undefined,
+      environment: environment || undefined,
+      tag: tag || undefined,
+    })
       .then(res => {
         setPagedData(res)
         setCurrentPage(res.page)
@@ -51,7 +89,7 @@ export default function ExercisesList() {
     setDeletingId(exerciseId)
     try {
       await remove(exerciseId)
-      await refresh(currentPage, searchQuery, selectedCategory)
+      await refresh(currentPage)
     } catch (err: unknown) {
       const axiosError = err as { response?: { status?: number; data?: unknown } }
       const status = axiosError?.response?.status
@@ -69,16 +107,16 @@ export default function ExercisesList() {
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault()
     setCurrentPage(1)
-    refresh(1, searchQuery, selectedCategory)
+    refresh(1)
   }
 
   const handlePageChange = (newPage: number) => {
     setCurrentPage(newPage)
-    refresh(newPage, searchQuery, selectedCategory)
+    refresh(newPage)
   }
 
   useEffect(() => {
-    refresh(1, '', '')
+    refresh(1, '', '', '', '', '', '', '')
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
@@ -96,16 +134,16 @@ export default function ExercisesList() {
       </div>
 
       <div className="card space-y-4">
-        <form onSubmit={handleSearch} className="flex flex-col gap-2 sm:flex-row">
+        <form onSubmit={handleSearch} className="grid gap-2 lg:grid-cols-6">
           <input
             type="text"
-            className="input flex-1"
-            placeholder="Buscar por nombre..."
+            className="input lg:col-span-2"
+            placeholder="Buscar por nombre, descripción o tag..."
             value={searchQuery}
             onChange={e => setSearchQuery(e.target.value)}
           />
           <select
-            className="input w-full sm:w-48"
+            className="input"
             value={selectedCategory}
             onChange={e => setSelectedCategory(e.target.value)}
           >
@@ -116,23 +154,85 @@ export default function ExercisesList() {
               </option>
             ))}
           </select>
-          <button type="submit" className="btn-primary">
-            Buscar
-          </button>
-          {(searchQuery || selectedCategory) && (
-            <button
-              type="button"
-              className="btn"
-              onClick={() => {
-                setSearchQuery('')
-                setSelectedCategory('')
-                setCurrentPage(1)
-                refresh(1, '', '')
-              }}
-            >
-              Limpiar
+          <select
+            className="input"
+            value={selectedMuscle}
+            onChange={e => setSelectedMuscle(e.target.value)}
+          >
+            <option value="">Todos los músculos</option>
+            {MUSCLE_GROUPS.map(item => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={selectedEquipment}
+            onChange={e => setSelectedEquipment(e.target.value)}
+          >
+            <option value="">Todo equipamiento</option>
+            {EQUIPMENT.map(item => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={selectedDifficulty}
+            onChange={e => setSelectedDifficulty(e.target.value)}
+          >
+            <option value="">Toda dificultad</option>
+            {DIFFICULTIES.map(item => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <select
+            className="input"
+            value={selectedEnvironment}
+            onChange={e => setSelectedEnvironment(e.target.value)}
+          >
+            <option value="">Todo entorno</option>
+            {ENVIRONMENTS.map(item => (
+              <option key={item} value={item}>
+                {item}
+              </option>
+            ))}
+          </select>
+          <input
+            type="text"
+            className="input lg:col-span-2"
+            placeholder="Tag..."
+            value={tagFilter}
+            onChange={e => setTagFilter(e.target.value)}
+          />
+          <div className="flex gap-2 lg:col-span-4">
+            <button type="submit" className="btn-primary">
+              Buscar
             </button>
-          )}
+            {hasFilters && (
+              <button
+                type="button"
+                className="btn"
+                onClick={() => {
+                  setSearchQuery('')
+                  setSelectedCategory('')
+                  setSelectedMuscle('')
+                  setSelectedEquipment('')
+                  setSelectedDifficulty('')
+                  setSelectedEnvironment('')
+                  setTagFilter('')
+                  setCurrentPage(1)
+                  refresh(1, '', '', '', '', '', '', '')
+                }}
+              >
+                Limpiar
+              </button>
+            )}
+          </div>
         </form>
 
         {error && <p className="text-sm text-red-600">{error}</p>}
@@ -144,13 +244,13 @@ export default function ExercisesList() {
           <EmptyState
             title="No hay ejercicios"
             message={
-              searchQuery || selectedCategory
+              hasFilters
                 ? 'No se encontraron ejercicios con ese criterio.'
                 : 'Aún no hay ejercicios registrados.'
             }
-            actionLabel={!searchQuery && !selectedCategory && canEdit ? 'Crear primer ejercicio' : undefined}
+            actionLabel={!hasFilters && canEdit ? 'Crear primer ejercicio' : undefined}
             onAction={
-              !searchQuery && !selectedCategory && canEdit
+              !hasFilters && canEdit
                 ? () => (window.location.href = '/exercises/new')
                 : undefined
             }
@@ -258,4 +358,3 @@ export default function ExercisesList() {
     </div>
   )
 }
-
