@@ -1,6 +1,28 @@
 import { api } from './client'
 import type { Exercise, PagedResult } from '../lib/types'
 
+type ExercisePayload = {
+  name: string
+  category: string
+  defaultSets?: number | null
+  defaultReps?: number | null
+  coachId?: number | null
+  isGlobal?: boolean
+  description?: string | null
+  instructions?: string | null
+  videoUrl?: string | null
+  referenceUrl?: string | null
+  difficultyLevel?: string | null
+  movementPattern?: string | null
+  equipment?: string | null
+  targetMuscleGroup?: string | null
+  secondaryMuscleGroups?: string | null
+  exerciseType?: string | null
+  environment?: string | null
+  tags?: string | null
+  isActive?: boolean
+}
+
 export async function search(params: {
   page?: number
   pageSize?: number
@@ -19,24 +41,14 @@ export async function get(id: number): Promise<Exercise> {
   return data
 }
 
-export async function create(payload: {
-  name: string
-  category: string
-  defaultSets?: number | null
-  defaultReps?: number | null
-}): Promise<Exercise> {
+export async function create(payload: ExercisePayload): Promise<Exercise> {
   const { data } = await api.post<Exercise>('/api/Exercises', payload)
   return data
 }
 
 export async function update(
   id: number,
-  payload: {
-    name: string
-    category: string
-    defaultSets?: number | null
-    defaultReps?: number | null
-  },
+  payload: ExercisePayload,
 ): Promise<Exercise> {
   const { data } = await api.put<Exercise>(`/api/Exercises/${id}`, payload)
   return data

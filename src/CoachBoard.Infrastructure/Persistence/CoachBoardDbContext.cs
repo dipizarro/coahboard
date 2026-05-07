@@ -145,6 +145,7 @@ public class CoachBoardDbContext : DbContext
         {
             e.ToTable("Exercises");
             e.HasKey(x => x.Id);
+            e.Property(x => x.IsGlobal).IsRequired().HasDefaultValue(false);
             e.Property(x => x.Name).IsRequired().HasMaxLength(120);
             e.Property(x => x.Category).IsRequired().HasMaxLength(60);
             e.Property(x => x.Description).HasMaxLength(1000);
@@ -160,6 +161,13 @@ public class CoachBoardDbContext : DbContext
             e.Property(x => x.Environment).HasMaxLength(80);
             e.Property(x => x.Tags).HasMaxLength(500);
             e.Property(x => x.IsActive).IsRequired().HasDefaultValue(true);
+
+            e.HasOne(x => x.Coach)
+                .WithMany(c => c.Exercises)
+                .HasForeignKey(x => x.CoachId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            e.HasIndex(x => new { x.IsGlobal, x.CoachId });
         });
 
         // Routine

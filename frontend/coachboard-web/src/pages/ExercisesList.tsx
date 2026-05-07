@@ -19,7 +19,6 @@ export default function ExercisesList() {
   const [selectedCategory, setSelectedCategory] = useState<string>('')
   const [currentPage, setCurrentPage] = useState(1)
   const { role } = useAuth()
-  const canDelete = role === 'Admin'
   const canEdit = role === 'Admin' || role === 'Coach'
 
   const pageSize = 10
@@ -41,8 +40,10 @@ export default function ExercisesList() {
   }
 
   const handleDelete = async (exerciseId: number) => {
-    if (!canDelete) {
-      setActionError('Solo los administradores pueden eliminar ejercicios.')
+    const exercise = pagedData?.items.find(item => item.id === exerciseId)
+    const canDeleteExercise = role === 'Admin' || (role === 'Coach' && exercise && !exercise.isGlobal)
+    if (!canDeleteExercise) {
+      setActionError('No tienes permisos para eliminar este ejercicio.')
       return
     }
     if (!window.confirm('¿Eliminar ejercicio?')) return
@@ -173,6 +174,19 @@ export default function ExercisesList() {
                   ),
                 },
                 {
+                  key: 'origin',
+                  label: 'Origen',
+                  render: e => (
+                    <span
+                      className={`rounded-full px-2 py-1 text-xs ${
+                        e.isGlobal ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                      }`}
+                    >
+                      {e.isGlobal ? 'Sistema' : 'Propio'}
+                    </span>
+                  ),
+                },
+                {
                   key: 'defaultSets',
                   label: 'Series',
                   render: e => e.defaultSets ?? '—',
@@ -187,12 +201,12 @@ export default function ExercisesList() {
                   label: 'Acciones',
                   render: e => (
                     <div className="flex gap-2">
-                      {canEdit && (
+                      {(role === 'Admin' || (canEdit && !e.isGlobal)) && (
                         <Link className="btn text-xs" to={`/exercises/${e.id}`}>
                           Editar
                         </Link>
                       )}
-                      {canDelete && (
+                      {(role === 'Admin' || (role === 'Coach' && !e.isGlobal)) && (
                         <button
                           className="btn text-xs"
                           disabled={deletingId === e.id}

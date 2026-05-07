@@ -9,6 +9,7 @@ public class ExerciseCreateDtoValidator : AbstractValidator<ExerciseCreateDto>
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(60);
+        RuleFor(x => x.CoachId).GreaterThan(0).When(x => x.CoachId.HasValue);
         RuleFor(x => x.DefaultSets).InclusiveBetween(1, 20).When(x => x.DefaultSets.HasValue);
         RuleFor(x => x.DefaultReps).InclusiveBetween(1, 200).When(x => x.DefaultReps.HasValue);
         RuleFor(x => x.Description).MaximumLength(1000);
@@ -32,6 +33,7 @@ public class ExerciseUpdateDtoValidator : AbstractValidator<ExerciseUpdateDto>
     {
         RuleFor(x => x.Name).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Category).NotEmpty().MaximumLength(60);
+        RuleFor(x => x.CoachId).GreaterThan(0).When(x => x.CoachId.HasValue);
         RuleFor(x => x.DefaultSets).InclusiveBetween(1, 20).When(x => x.DefaultSets.HasValue);
         RuleFor(x => x.DefaultReps).InclusiveBetween(1, 200).When(x => x.DefaultReps.HasValue);
         RuleFor(x => x.Description).MaximumLength(1000);

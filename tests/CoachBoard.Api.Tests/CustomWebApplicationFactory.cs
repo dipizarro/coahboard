@@ -71,7 +71,7 @@ public class CustomWebApplicationFactory<TProgram> : WebApplicationFactory<TProg
         }
 
         // Global Exercise
-        var exercise = new Domain.Entities.Exercise { Id = 10, Name = "Push Up", Category = "Chest" };
+        var exercise = new Domain.Entities.Exercise { Id = 10, Name = "Push Up", Category = "Chest", IsGlobal = true };
 
         // Seed Tenant A
         var tenantA = new Domain.Entities.Tenant { Id = 10, Name = "Tenant A", Plan = Domain.Enums.SubscriptionPlan.Free };

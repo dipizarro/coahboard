@@ -5,6 +5,8 @@ public record ExerciseCreateDto(
     string Category,
     int? DefaultSets,
     int? DefaultReps,
+    int? CoachId = null,
+    bool IsGlobal = false,
     string? Description = null,
     string? Instructions = null,
     string? VideoUrl = null,
@@ -24,6 +26,8 @@ public record ExerciseUpdateDto(
     string Category,
     int? DefaultSets,
     int? DefaultReps,
+    int? CoachId = null,
+    bool IsGlobal = false,
     string? Description = null,
     string? Instructions = null,
     string? VideoUrl = null,
@@ -40,6 +44,8 @@ public record ExerciseUpdateDto(
 
 public record ExerciseReadDto(
     int Id,
+    int? CoachId,
+    bool IsGlobal,
     string Name,
     string Category,
     int? DefaultSets,

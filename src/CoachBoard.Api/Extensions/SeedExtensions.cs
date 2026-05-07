@@ -32,9 +32,9 @@ public static class SeedExtensions
         var exercises = scope.ServiceProvider.GetRequiredService<IExerciseRepository>();
         if (!(await exercises.GetAllAsync()).Any())
         {
-            await exercises.AddAsync(new Exercise { Name = "Sentadilla", Category = "Fuerza", DefaultSets = 4, DefaultReps = 8 });
-            await exercises.AddAsync(new Exercise { Name = "Press banca", Category = "Fuerza", DefaultSets = 4, DefaultReps = 10 });
-            await exercises.AddAsync(new Exercise { Name = "Remo con mancuerna", Category = "Fuerza", DefaultSets = 3, DefaultReps = 12 });
+            await exercises.AddAsync(new Exercise { Name = "Sentadilla", Category = "Fuerza", DefaultSets = 4, DefaultReps = 8, IsGlobal = true });
+            await exercises.AddAsync(new Exercise { Name = "Press banca", Category = "Fuerza", DefaultSets = 4, DefaultReps = 10, IsGlobal = true });
+            await exercises.AddAsync(new Exercise { Name = "Remo con mancuerna", Category = "Fuerza", DefaultSets = 3, DefaultReps = 12, IsGlobal = true });
             await exercises.SaveChangesAsync();
         }
     }

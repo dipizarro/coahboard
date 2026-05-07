@@ -46,10 +46,25 @@ export type Athlete = {
 
 export type Exercise = {
   id: number
+  coachId?: number | null
+  isGlobal: boolean
   name: string
   category: string
   defaultSets?: number | null
   defaultReps?: number | null
+  description?: string | null
+  instructions?: string | null
+  videoUrl?: string | null
+  referenceUrl?: string | null
+  difficultyLevel?: string | null
+  movementPattern?: string | null
+  equipment?: string | null
+  targetMuscleGroup?: string | null
+  secondaryMuscleGroups?: string | null
+  exerciseType?: string | null
+  environment?: string | null
+  tags?: string | null
+  isActive: boolean
   createdAt?: string
 }
 

@@ -9,9 +9,10 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
 {
     public ExerciseRepository(CoachBoardDbContext context, ICurrentTenant currentTenant) : base(context, currentTenant) { }
 
-    public async Task<IEnumerable<Exercise>> SearchAsync(string? q, string? category, int page, int pageSize)
+    public async Task<IEnumerable<Exercise>> SearchAsync(string? q, string? category, int page, int pageSize, bool includeAll, int? coachId)
     {
         var query = _context.Exercises.AsNoTracking().AsQueryable();
+        query = ApplyVisibility(query, includeAll, coachId);
 
         if (!string.IsNullOrWhiteSpace(q))
         {
@@ -31,9 +32,10 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
             .ToListAsync();
     }
 
-    public async Task<int> CountAsync(string? q, string? category)
+    public async Task<int> CountAsync(string? q, string? category, bool includeAll, int? coachId)
     {
         var query = _context.Exercises.AsQueryable();
+        query = ApplyVisibility(query, includeAll, coachId);
 
         if (!string.IsNullOrWhiteSpace(q))
         {
@@ -47,5 +49,20 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
         }
 
         return await query.CountAsync();
+    }
+
+    private static IQueryable<Exercise> ApplyVisibility(IQueryable<Exercise> query, bool includeAll, int? coachId)
+    {
+        if (includeAll)
+        {
+            return query;
+        }
+
+        if (coachId.HasValue)
+        {
+            return query.Where(e => e.IsGlobal || e.CoachId == coachId.Value);
+        }
+
+        return query.Where(e => e.IsGlobal);
     }
 }
