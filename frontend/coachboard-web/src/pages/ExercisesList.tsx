@@ -6,6 +6,7 @@ import { useAuth } from '../auth/useAuth'
 import Table from '../components/Table'
 import EmptyState from '../components/EmptyState'
 import Loader from '../components/Loader'
+import ExerciseCard from '../components/ExerciseCard'
 
 const CATEGORIES = ['Fuerza', 'Cardio', 'Movilidad', 'Flexibilidad', 'General']
 const MUSCLE_GROUPS = ['Pectoral', 'Espalda', 'Hombros', 'Brazos', 'Core', 'Piernas', 'Glúteos']
@@ -27,6 +28,7 @@ export default function ExercisesList() {
   const [selectedEnvironment, setSelectedEnvironment] = useState<string>('')
   const [tagFilter, setTagFilter] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
+  const [viewMode, setViewMode] = useState<'cards' | 'table'>('cards')
   const { role } = useAuth()
   const canEdit = role === 'Admin' || role === 'Coach'
 
@@ -125,12 +127,33 @@ export default function ExercisesList() {
   return (
     <div className="space-y-4">
       <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <h1 className="text-2xl font-bold">Ejercicios</h1>
-        {canEdit && (
-          <Link to="/exercises/new" className="btn-primary">
-            Nuevo ejercicio
-          </Link>
-        )}
+        <div>
+          <p className="text-sm text-gray-500">Biblioteca</p>
+          <h1 className="text-2xl font-bold">Ejercicios</h1>
+        </div>
+        <div className="flex flex-wrap gap-2">
+          <div className="flex rounded-lg border border-gray-200 bg-white p-1">
+            <button
+              type="button"
+              className={`rounded-md px-3 py-1.5 text-sm ${viewMode === 'cards' ? 'bg-primary-600 text-white' : 'text-gray-600'}`}
+              onClick={() => setViewMode('cards')}
+            >
+              Cards
+            </button>
+            <button
+              type="button"
+              className={`rounded-md px-3 py-1.5 text-sm ${viewMode === 'table' ? 'bg-primary-600 text-white' : 'text-gray-600'}`}
+              onClick={() => setViewMode('table')}
+            >
+              Tabla
+            </button>
+          </div>
+          {canEdit && (
+            <Link to="/exercises/new" className="btn-primary">
+              Nuevo ejercicio
+            </Link>
+          )}
+        </div>
       </div>
 
       <div className="card space-y-4">
@@ -257,74 +280,93 @@ export default function ExercisesList() {
           />
         ) : (
           <>
-            <Table
-              columns={[
-                {
-                  key: 'name',
-                  label: 'Nombre',
-                  render: e => e.name,
-                },
-                {
-                  key: 'category',
-                  label: 'Categoría',
-                  render: e => (
-                    <span className="rounded-full bg-primary-100 px-2 py-1 text-xs text-primary-700">
-                      {e.category}
-                    </span>
-                  ),
-                },
-                {
-                  key: 'origin',
-                  label: 'Origen',
-                  render: e => (
-                    <span
-                      className={`rounded-full px-2 py-1 text-xs ${
-                        e.isGlobal ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
-                      }`}
-                    >
-                      {e.isGlobal ? 'Sistema' : 'Propio'}
-                    </span>
-                  ),
-                },
-                {
-                  key: 'defaultSets',
-                  label: 'Series',
-                  render: e => e.defaultSets ?? '—',
-                },
-                {
-                  key: 'defaultReps',
-                  label: 'Repeticiones',
-                  render: e => e.defaultReps ?? '—',
-                },
-                {
-                  key: 'actions',
-                  label: 'Acciones',
-                  render: e => (
-                    <div className="flex gap-2">
-                      {(role === 'Admin' || (canEdit && !e.isGlobal)) && (
-                        <Link className="btn text-xs" to={`/exercises/${e.id}`}>
-                          Editar
-                        </Link>
-                      )}
-                      {(role === 'Admin' || (role === 'Coach' && !e.isGlobal)) && (
-                        <button
-                          className="btn text-xs"
-                          disabled={deletingId === e.id}
-                          onClick={ev => {
-                            ev.stopPropagation()
-                            handleDelete(e.id)
-                          }}
-                        >
-                          {deletingId === e.id ? 'Eliminando…' : 'Eliminar'}
-                        </button>
-                      )}
-                    </div>
-                  ),
-                },
-              ]}
-              data={pagedData.items}
-              keyExtractor={e => e.id}
-            />
+            {viewMode === 'cards' ? (
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {pagedData.items.map(exercise => {
+                  const canEditExercise = role === 'Admin' || (canEdit && !exercise.isGlobal)
+                  const canDeleteExercise = role === 'Admin' || (role === 'Coach' && !exercise.isGlobal)
+                  return (
+                    <ExerciseCard
+                      key={exercise.id}
+                      exercise={exercise}
+                      canEdit={canEditExercise}
+                      canDelete={canDeleteExercise}
+                      deleting={deletingId === exercise.id}
+                      onDelete={handleDelete}
+                    />
+                  )
+                })}
+              </div>
+            ) : (
+              <Table
+                columns={[
+                  {
+                    key: 'name',
+                    label: 'Nombre',
+                    render: e => e.name,
+                  },
+                  {
+                    key: 'category',
+                    label: 'Categoría',
+                    render: e => (
+                      <span className="rounded-full bg-primary-100 px-2 py-1 text-xs text-primary-700">
+                        {e.category}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'targetMuscleGroup',
+                    label: 'Músculo',
+                    render: e => e.targetMuscleGroup ?? '—',
+                  },
+                  {
+                    key: 'equipment',
+                    label: 'Equipo',
+                    render: e => e.equipment ?? '—',
+                  },
+                  {
+                    key: 'origin',
+                    label: 'Origen',
+                    render: e => (
+                      <span
+                        className={`rounded-full px-2 py-1 text-xs ${
+                          e.isGlobal ? 'bg-blue-100 text-blue-700' : 'bg-emerald-100 text-emerald-700'
+                        }`}
+                      >
+                        {e.isGlobal ? 'Sistema' : 'Propio'}
+                      </span>
+                    ),
+                  },
+                  {
+                    key: 'actions',
+                    label: 'Acciones',
+                    render: e => (
+                      <div className="flex gap-2">
+                        {(role === 'Admin' || (canEdit && !e.isGlobal)) && (
+                          <Link className="btn text-xs" to={`/exercises/${e.id}`}>
+                            Editar
+                          </Link>
+                        )}
+                        {(role === 'Admin' || (role === 'Coach' && !e.isGlobal)) && (
+                          <button
+                            className="btn text-xs"
+                            disabled={deletingId === e.id}
+                            onClick={ev => {
+                              ev.stopPropagation()
+                              handleDelete(e.id)
+                            }}
+                          >
+                            {deletingId === e.id ? 'Eliminando...' : 'Eliminar'}
+                          </button>
+                        )}
+                      </div>
+                    ),
+                  },
+                ]}
+                data={pagedData.items}
+                keyExtractor={e => e.id}
+              />
+            )}
 
             {totalPages > 1 && (
               <div className="flex items-center justify-between border-t pt-4">
