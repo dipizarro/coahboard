@@ -42,6 +42,33 @@ public class ClientProgressController : ControllerBase
         return Ok(_mapper.Map<IEnumerable<ClientProgressReadDto>>(records));
     }
 
+    [HttpGet("summary")]
+    public async Task<ActionResult<ClientProgressSummaryDto>> GetSummary(int clientId)
+    {
+        var client = await _clients.GetByIdAsync(clientId);
+        if (client is null) return NotFound();
+        if (!CurrentCoachCanAccessClient(client)) return Forbid();
+
+        var (first, last, total) = await _progress.GetFirstLastAndCountByClientAsync(clientId);
+
+        return Ok(new ClientProgressSummaryDto(
+            ClientId: clientId,
+            FirstRecordDate: first?.RecordedAt,
+            LastRecordDate: last?.RecordedAt,
+            TotalRecords: total,
+            InitialWeightKg: first?.WeightKg,
+            CurrentWeightKg: last?.WeightKg,
+            WeightChangeKg: CalculateChange(first?.WeightKg, last?.WeightKg),
+            InitialWaistCm: first?.WaistCm,
+            CurrentWaistCm: last?.WaistCm,
+            WaistChangeCm: CalculateChange(first?.WaistCm, last?.WaistCm),
+            InitialBodyFatPercentage: first?.BodyFatPercentage,
+            CurrentBodyFatPercentage: last?.BodyFatPercentage,
+            BodyFatChangePercentage: CalculateChange(first?.BodyFatPercentage, last?.BodyFatPercentage),
+            DaysSinceStart: CalculateDaysSinceStart(first?.RecordedAt, last?.RecordedAt),
+            LastUpdatedAt: last?.CreatedAt));
+    }
+
     [HttpGet("{progressId:int}")]
     public async Task<ActionResult<ClientProgressReadDto>> GetById(int clientId, int progressId)
     {
@@ -111,5 +138,16 @@ public class ClientProgressController : ControllerBase
         if (!_currentUser.IsCoach) return true;
 
         return _currentUser.CoachId is not null && client.CoachId == _currentUser.CoachId.Value;
+    }
+
+    private static decimal? CalculateChange(decimal? initial, decimal? current)
+    {
+        return initial.HasValue && current.HasValue ? current.Value - initial.Value : null;
+    }
+
+    private static int? CalculateDaysSinceStart(DateTime? firstRecordDate, DateTime? lastRecordDate)
+    {
+        if (!firstRecordDate.HasValue || !lastRecordDate.HasValue) return null;
+        return Math.Max(0, (int)Math.Floor((lastRecordDate.Value.Date - firstRecordDate.Value.Date).TotalDays));
     }
 }

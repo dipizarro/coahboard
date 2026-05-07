@@ -90,6 +90,24 @@ export type ClientProgressRecord = {
   createdAt?: string
 }
 
+export type ClientProgressSummary = {
+  clientId: number
+  firstRecordDate?: string | null
+  lastRecordDate?: string | null
+  totalRecords: number
+  initialWeightKg?: number | null
+  currentWeightKg?: number | null
+  weightChangeKg?: number | null
+  initialWaistCm?: number | null
+  currentWaistCm?: number | null
+  waistChangeCm?: number | null
+  initialBodyFatPercentage?: number | null
+  currentBodyFatPercentage?: number | null
+  bodyFatChangePercentage?: number | null
+  daysSinceStart?: number | null
+  lastUpdatedAt?: string | null
+}
+
 export type ClientProgressPayload = {
   recordedAt: string
   weightKg?: number | null

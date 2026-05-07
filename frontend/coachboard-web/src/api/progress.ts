@@ -1,8 +1,13 @@
 import { api } from './client'
-import type { ClientProgressPayload, ClientProgressRecord } from '../lib/types'
+import type { ClientProgressPayload, ClientProgressRecord, ClientProgressSummary } from '../lib/types'
 
 export async function list(clientId: number): Promise<ClientProgressRecord[]> {
   const { data } = await api.get<ClientProgressRecord[]>(`/api/clients/${clientId}/progress`)
+  return data
+}
+
+export async function summary(clientId: number): Promise<ClientProgressSummary> {
+  const { data } = await api.get<ClientProgressSummary>(`/api/clients/${clientId}/progress/summary`)
   return data
 }
 

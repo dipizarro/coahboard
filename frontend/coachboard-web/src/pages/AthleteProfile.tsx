@@ -1,7 +1,12 @@
 import { useEffect, useMemo, useState, type FormEvent } from 'react'
 import { Link, useNavigate, useParams } from 'react-router-dom'
 import { get as getAthlete } from '../api/athletes'
-import { list as listProgress, create as createProgress, remove as removeProgress } from '../api/progress'
+import {
+  list as listProgress,
+  summary as getProgressSummary,
+  create as createProgress,
+  remove as removeProgress,
+} from '../api/progress'
 import { list as listRoutines } from '../api/routines'
 import { list as listSessions } from '../api/sessions'
 import AthleteHealthCard from '../components/AthleteHealthCard'
@@ -10,9 +15,17 @@ import EmptyState from '../components/EmptyState'
 import LatestProgressCard from '../components/LatestProgressCard'
 import Loader from '../components/Loader'
 import ProgressHistoryTable from '../components/ProgressHistoryTable'
+import ProgressSummaryCard from '../components/ProgressSummaryCard'
 import Table from '../components/Table'
 import { useAuth } from '../auth/useAuth'
-import type { Athlete, ClientProgressPayload, ClientProgressRecord, Routine, Session } from '../lib/types'
+import type {
+  Athlete,
+  ClientProgressPayload,
+  ClientProgressRecord,
+  ClientProgressSummary,
+  Routine,
+  Session,
+} from '../lib/types'
 
 type ProgressFormState = {
   recordedAt: string
@@ -60,6 +73,7 @@ export default function AthleteProfile() {
   const { coachId } = useAuth()
   const [athlete, setAthlete] = useState<Athlete | null>(null)
   const [progress, setProgress] = useState<ClientProgressRecord[]>([])
+  const [progressSummary, setProgressSummary] = useState<ClientProgressSummary | null>(null)
   const [routines, setRoutines] = useState<Routine[]>([])
   const [sessions, setSessions] = useState<Session[]>([])
   const [loading, setLoading] = useState(true)
@@ -93,9 +107,10 @@ export default function AthleteProfile() {
       const to = new Date(today)
       to.setDate(today.getDate() + 30)
 
-      const [athleteData, progressData, routinesData, sessionsData] = await Promise.all([
+      const [athleteData, progressData, summaryData, routinesData, sessionsData] = await Promise.all([
         getAthlete(id),
         listProgress(clientId),
+        getProgressSummary(clientId),
         listRoutines({ clientId, page: 1, pageSize: 5 }),
         coachId
           ? listSessions({
@@ -109,6 +124,7 @@ export default function AthleteProfile() {
 
       setAthlete(athleteData)
       setProgress(progressData)
+      setProgressSummary(summaryData)
       setRoutines(routinesData.items)
       setSessions(sessionsData)
     } catch (err) {
@@ -144,6 +160,7 @@ export default function AthleteProfile() {
     try {
       const created = await createProgress(clientId, buildProgressPayload())
       setProgress(records => [created, ...records])
+      setProgressSummary(await getProgressSummary(clientId))
       setProgressForm(initialProgressForm())
     } catch (err: any) {
       const msg = err?.response?.data ?? 'No se pudo registrar la medición.'
@@ -161,6 +178,7 @@ export default function AthleteProfile() {
     try {
       await removeProgress(clientId, record.id)
       setProgress(records => records.filter(item => item.id !== record.id))
+      setProgressSummary(await getProgressSummary(clientId))
     } catch (err: any) {
       const msg = err?.response?.data ?? 'No se pudo eliminar la medición.'
       setActionError(typeof msg === 'string' ? msg : 'No se pudo eliminar la medición.')
@@ -217,7 +235,10 @@ export default function AthleteProfile() {
           <AthleteSummaryCard athlete={athlete} />
           <AthleteHealthCard athlete={athlete} />
         </div>
-        <LatestProgressCard record={latestProgress} />
+        <div className="space-y-4">
+          <LatestProgressCard record={latestProgress} />
+          <ProgressSummaryCard summary={progressSummary} />
+        </div>
       </div>
 
       <section className="card space-y-4">

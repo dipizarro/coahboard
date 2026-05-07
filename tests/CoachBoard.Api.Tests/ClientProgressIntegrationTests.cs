@@ -73,10 +73,83 @@ public class ClientProgressIntegrationTests : BaseIntegrationTest
             WeightKg: 75m);
 
         (await Client.GetAsync($"/api/clients/{clientId}/progress")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await Client.GetAsync($"/api/clients/{clientId}/progress/summary")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await Client.GetAsync($"/api/clients/{clientId}/progress/{progressId}")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await Client.PostAsJsonAsync($"/api/clients/{clientId}/progress", create)).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await Client.PutAsJsonAsync($"/api/clients/{clientId}/progress/{progressId}", new ClientProgressUpdateDto(DateTime.UtcNow, WeightKg: 74m))).StatusCode.Should().Be(HttpStatusCode.Forbidden);
         (await Client.DeleteAsync($"/api/clients/{clientId}/progress/{progressId}")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task ProgressSummary_WhenClientHasNoRecords_ReturnsEmptySummary()
+    {
+        var clientId = await CreateClientForCoachAAsync();
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.GetAsync($"/api/clients/{clientId}/progress/summary");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var summary = await response.Content.ReadFromJsonAsync<ClientProgressSummaryDto>();
+        summary.Should().NotBeNull();
+        summary!.ClientId.Should().Be(clientId);
+        summary.TotalRecords.Should().Be(0);
+        summary.FirstRecordDate.Should().BeNull();
+        summary.LastRecordDate.Should().BeNull();
+        summary.InitialWeightKg.Should().BeNull();
+        summary.CurrentWeightKg.Should().BeNull();
+        summary.WeightChangeKg.Should().BeNull();
+        summary.DaysSinceStart.Should().BeNull();
+        summary.LastUpdatedAt.Should().BeNull();
+    }
+
+    [Fact]
+    public async Task ProgressSummary_WhenClientHasRecords_ReturnsEvolutionIndicators()
+    {
+        var clientId = await CreateClientForCoachAAsync();
+
+        Db.ClientProgressRecords.AddRange(
+            new ClientProgressRecord
+            {
+                ClientId = clientId,
+                RecordedAt = new DateTime(2026, 5, 1, 8, 0, 0, DateTimeKind.Utc),
+                WeightKg = 82.5m,
+                WaistCm = 88m,
+                BodyFatPercentage = 18.4m,
+                CreatedAt = new DateTime(2026, 5, 1, 8, 5, 0, DateTimeKind.Utc)
+            },
+            new ClientProgressRecord
+            {
+                ClientId = clientId,
+                RecordedAt = new DateTime(2026, 5, 11, 8, 0, 0, DateTimeKind.Utc),
+                WeightKg = 80m,
+                WaistCm = 85.5m,
+                BodyFatPercentage = 17.2m,
+                CreatedAt = new DateTime(2026, 5, 11, 8, 5, 0, DateTimeKind.Utc)
+            });
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.GetAsync($"/api/clients/{clientId}/progress/summary");
+
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+        var summary = await response.Content.ReadFromJsonAsync<ClientProgressSummaryDto>();
+        summary.Should().NotBeNull();
+        summary!.ClientId.Should().Be(clientId);
+        summary.TotalRecords.Should().Be(2);
+        summary.FirstRecordDate.Should().Be(new DateTime(2026, 5, 1, 8, 0, 0, DateTimeKind.Utc));
+        summary.LastRecordDate.Should().Be(new DateTime(2026, 5, 11, 8, 0, 0, DateTimeKind.Utc));
+        summary.InitialWeightKg.Should().Be(82.5m);
+        summary.CurrentWeightKg.Should().Be(80m);
+        summary.WeightChangeKg.Should().Be(-2.5m);
+        summary.InitialWaistCm.Should().Be(88m);
+        summary.CurrentWaistCm.Should().Be(85.5m);
+        summary.WaistChangeCm.Should().Be(-2.5m);
+        summary.InitialBodyFatPercentage.Should().Be(18.4m);
+        summary.CurrentBodyFatPercentage.Should().Be(17.2m);
+        summary.BodyFatChangePercentage.Should().Be(-1.2m);
+        summary.DaysSinceStart.Should().Be(10);
+        summary.LastUpdatedAt.Should().Be(new DateTime(2026, 5, 11, 8, 5, 0, DateTimeKind.Utc));
     }
 
     [Fact]
@@ -86,10 +159,29 @@ public class ClientProgressIntegrationTests : BaseIntegrationTest
         await AuthenticateAsAdminInTenantAAsync();
 
         var getResponse = await Client.GetAsync($"/api/clients/{clientId}/progress/{progressId}");
+        var summaryResponse = await Client.GetAsync($"/api/clients/{clientId}/progress/summary");
 
         getResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        summaryResponse.StatusCode.Should().Be(HttpStatusCode.OK);
         var record = await getResponse.Content.ReadFromJsonAsync<ClientProgressReadDto>();
         record!.Id.Should().Be(progressId);
+    }
+
+    private async Task<int> CreateClientForCoachAAsync()
+    {
+        var suffix = Guid.NewGuid().ToString("N");
+
+        var client = new Client
+        {
+            FullName = $"Progress Summary Client {suffix}",
+            Email = $"progress-summary-client-{suffix}@test.local",
+            CoachId = 10,
+            TenantId = 10
+        };
+        Db.Clients.Add(client);
+        await Db.SaveChangesAsync();
+
+        return client.Id;
     }
 
     private async Task<(int ClientId, int ProgressId)> CreateProgressForAnotherCoachInTenantAAsync()

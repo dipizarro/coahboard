@@ -47,3 +47,20 @@ public record ClientProgressReadDto(
     int? RestingHeartRate,
     string? Notes,
     DateTime CreatedAt);
+
+public record ClientProgressSummaryDto(
+    int ClientId,
+    DateTime? FirstRecordDate,
+    DateTime? LastRecordDate,
+    int TotalRecords,
+    decimal? InitialWeightKg,
+    decimal? CurrentWeightKg,
+    decimal? WeightChangeKg,
+    decimal? InitialWaistCm,
+    decimal? CurrentWaistCm,
+    decimal? WaistChangeCm,
+    decimal? InitialBodyFatPercentage,
+    decimal? CurrentBodyFatPercentage,
+    decimal? BodyFatChangePercentage,
+    int? DaysSinceStart,
+    DateTime? LastUpdatedAt);
