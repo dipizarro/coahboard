@@ -11,6 +11,7 @@ public class Exercise
     public int? DefaultReps { get; set; }
     public string? Description { get; set; }
     public string? Instructions { get; set; }
+    public string? ImageUrl { get; set; }
     public string? VideoUrl { get; set; }
     public string? ReferenceUrl { get; set; }
     public string? DifficultyLevel { get; set; }

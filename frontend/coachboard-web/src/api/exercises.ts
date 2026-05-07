@@ -10,6 +10,7 @@ type ExercisePayload = {
   isGlobal?: boolean
   description?: string | null
   instructions?: string | null
+  imageUrl?: string | null
   videoUrl?: string | null
   referenceUrl?: string | null
   difficultyLevel?: string | null

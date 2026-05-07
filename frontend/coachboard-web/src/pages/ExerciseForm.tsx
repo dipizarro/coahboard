@@ -16,6 +16,7 @@ type FormState = {
   category: string
   description: string
   instructions: string
+  imageUrl: string
   videoUrl: string
   referenceUrl: string
   difficultyLevel: string
@@ -38,6 +39,7 @@ const initialForm: FormState = {
   category: 'General',
   description: '',
   instructions: '',
+  imageUrl: '',
   videoUrl: '',
   referenceUrl: '',
   difficultyLevel: '',
@@ -176,6 +178,7 @@ export default function ExerciseForm() {
           category: ex.category,
           description: ex.description ?? '',
           instructions: ex.instructions ?? '',
+          imageUrl: ex.imageUrl ?? '',
           videoUrl: ex.videoUrl ?? '',
           referenceUrl: ex.referenceUrl ?? '',
           difficultyLevel: ex.difficultyLevel ?? '',
@@ -219,6 +222,9 @@ export default function ExerciseForm() {
     if (!isValidUrl(form.videoUrl)) {
       errors.videoUrl = 'Ingresa una URL válida con http o https'
     }
+    if (!isValidUrl(form.imageUrl)) {
+      errors.imageUrl = 'Ingresa una URL válida con http o https'
+    }
     if (!isValidUrl(form.referenceUrl)) {
       errors.referenceUrl = 'Ingresa una URL válida con http o https'
     }
@@ -244,6 +250,7 @@ export default function ExerciseForm() {
         defaultReps: form.defaultReps ? Number(form.defaultReps) : null,
         description: textOrNull(form.description),
         instructions: textOrNull(form.instructions),
+        imageUrl: textOrNull(form.imageUrl),
         videoUrl: textOrNull(form.videoUrl),
         referenceUrl: textOrNull(form.referenceUrl),
         difficultyLevel: textOrNull(form.difficultyLevel),
@@ -420,6 +427,14 @@ export default function ExerciseForm() {
         icon={<><path d="M10 13a5 5 0 0 0 7 0l2-2a5 5 0 0 0-7-7l-1 1" /><path d="M14 11a5 5 0 0 0-7 0l-2 2a5 5 0 0 0 7 7l1-1" /></>}
       >
         <div className="grid gap-4 md:grid-cols-2">
+          <Field label="Imagen URL" error={fieldErrors.imageUrl}>
+            <input
+              className={`input ${fieldErrors.imageUrl ? 'border-red-500' : ''}`}
+              value={form.imageUrl}
+              onChange={e => updateField('imageUrl', e.target.value)}
+              placeholder="https://..."
+            />
+          </Field>
           <Field label="Video URL" error={fieldErrors.videoUrl}>
             <input
               className={`input ${fieldErrors.videoUrl ? 'border-red-500' : ''}`}

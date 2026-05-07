@@ -54,6 +54,7 @@ export type Exercise = {
   defaultReps?: number | null
   description?: string | null
   instructions?: string | null
+  imageUrl?: string | null
   videoUrl?: string | null
   referenceUrl?: string | null
   difficultyLevel?: string | null

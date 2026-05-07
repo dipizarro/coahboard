@@ -25,6 +25,7 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
             DefaultReps: 10,
             Description: "Variante de sentadilla con carga frontal.",
             Instructions: "Sostener la mancuerna al pecho y descender con control.",
+            ImageUrl: "https://example.com/images/goblet-squat.jpg",
             VideoUrl: "https://example.com/videos/goblet-squat",
             ReferenceUrl: "https://example.com/exercises/goblet-squat",
             DifficultyLevel: "Intermedio",
@@ -44,6 +45,7 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
         created!.Name.Should().Be(create.Name);
         created.Description.Should().Be(create.Description);
         created.Instructions.Should().Be(create.Instructions);
+        created.ImageUrl.Should().Be(create.ImageUrl);
         created.VideoUrl.Should().Be(create.VideoUrl);
         created.ReferenceUrl.Should().Be(create.ReferenceUrl);
         created.DifficultyLevel.Should().Be(create.DifficultyLevel);
@@ -65,6 +67,7 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
             DefaultReps: 8,
             Description: "Sentadilla goblet con pausa abajo.",
             Instructions: "Pausar dos segundos en el punto bajo antes de subir.",
+            ImageUrl: "https://example.com/images/goblet-squat-paused.webp",
             DifficultyLevel: "Avanzado",
             MovementPattern: "Squat",
             Equipment: "Kettlebell",
@@ -85,6 +88,7 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
         updated.DefaultReps.Should().Be(8);
         updated.Description.Should().Be(update.Description);
         updated.Instructions.Should().Be(update.Instructions);
+        updated.ImageUrl.Should().Be(update.ImageUrl);
         updated.DifficultyLevel.Should().Be("Avanzado");
         updated.Equipment.Should().Be("Kettlebell");
         updated.IsActive.Should().BeFalse();

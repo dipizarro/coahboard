@@ -9,10 +9,11 @@ type ExerciseCardProps = {
   onDelete: (exerciseId: number) => void
 }
 
-function iconPath(kind: 'category' | 'muscle' | 'equipment' | 'difficulty') {
+function iconPath(kind: 'category' | 'muscle' | 'equipment' | 'difficulty' | 'image') {
   if (kind === 'category') return <><path d="M4 7h16" /><path d="M4 12h10" /><path d="M4 17h16" /></>
   if (kind === 'muscle') return <><path d="M6 15c2-5 5-7 9-7" /><path d="M9 18c2-4 5-6 9-6" /><path d="M5 19c4 1 8 1 12-1" /></>
   if (kind === 'equipment') return <><path d="M5 9v6" /><path d="M19 9v6" /><path d="M8 12h8" /><path d="M3 10v4" /><path d="M21 10v4" /></>
+  if (kind === 'image') return <><rect x="4" y="5" width="16" height="14" rx="2" /><path d="m8 15 2.5-3 2 2.5 1.5-1.5 2 2" /><path d="M9 9h.01" /></>
   return <><path d="M4 20h16" /><path d="M6 16l4-4 3 3 5-7" /><path d="M18 8h-4" /><path d="M18 8v4" /></>
 }
 
@@ -55,6 +56,19 @@ export default function ExerciseCard({
 
   return (
     <article className="flex h-full flex-col rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary-100 hover:shadow-md">
+      <div className="mb-4 aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
+        {exercise.imageUrl ? (
+          <img src={exercise.imageUrl} alt={exercise.name} className="h-full w-full object-cover" loading="lazy" />
+        ) : (
+          <div className="flex h-full flex-col items-center justify-center gap-2 bg-primary-50 text-primary-700">
+            <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.8">
+              {iconPath(exercise.targetMuscleGroup ? 'muscle' : 'image')}
+            </svg>
+            <p className="text-sm font-medium">{exercise.targetMuscleGroup || exercise.category}</p>
+          </div>
+        )}
+      </div>
+
       <div className="flex items-start justify-between gap-3">
         <div className="min-w-0">
           <div className="mb-2 flex flex-wrap gap-2">
@@ -93,6 +107,16 @@ export default function ExerciseCard({
       )}
 
       <div className="mt-auto flex flex-wrap gap-2 pt-4">
+        {exercise.videoUrl && (
+          <a className="btn text-xs" href={exercise.videoUrl} target="_blank" rel="noopener noreferrer">
+            Ver video
+          </a>
+        )}
+        {exercise.referenceUrl && (
+          <a className="btn text-xs" href={exercise.referenceUrl} target="_blank" rel="noopener noreferrer">
+            Ver referencia
+          </a>
+        )}
         {canEdit ? (
           <Link className="btn-primary text-xs" to={`/exercises/${exercise.id}`}>
             Ver detalle

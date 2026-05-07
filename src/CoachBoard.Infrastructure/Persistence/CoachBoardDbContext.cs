@@ -150,6 +150,7 @@ public class CoachBoardDbContext : DbContext
             e.Property(x => x.Category).IsRequired().HasMaxLength(60);
             e.Property(x => x.Description).HasMaxLength(1000);
             e.Property(x => x.Instructions).HasMaxLength(2000);
+            e.Property(x => x.ImageUrl).HasMaxLength(500);
             e.Property(x => x.VideoUrl).HasMaxLength(500);
             e.Property(x => x.ReferenceUrl).HasMaxLength(500);
             e.Property(x => x.DifficultyLevel).HasMaxLength(50);
