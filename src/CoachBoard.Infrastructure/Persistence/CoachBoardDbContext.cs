@@ -147,6 +147,19 @@ public class CoachBoardDbContext : DbContext
             e.HasKey(x => x.Id);
             e.Property(x => x.Name).IsRequired().HasMaxLength(120);
             e.Property(x => x.Category).IsRequired().HasMaxLength(60);
+            e.Property(x => x.Description).HasMaxLength(1000);
+            e.Property(x => x.Instructions).HasMaxLength(2000);
+            e.Property(x => x.VideoUrl).HasMaxLength(500);
+            e.Property(x => x.ReferenceUrl).HasMaxLength(500);
+            e.Property(x => x.DifficultyLevel).HasMaxLength(50);
+            e.Property(x => x.MovementPattern).HasMaxLength(80);
+            e.Property(x => x.Equipment).HasMaxLength(100);
+            e.Property(x => x.TargetMuscleGroup).HasMaxLength(80);
+            e.Property(x => x.SecondaryMuscleGroups).HasMaxLength(300);
+            e.Property(x => x.ExerciseType).HasMaxLength(80);
+            e.Property(x => x.Environment).HasMaxLength(80);
+            e.Property(x => x.Tags).HasMaxLength(500);
+            e.Property(x => x.IsActive).IsRequired().HasDefaultValue(true);
         });
 
         // Routine

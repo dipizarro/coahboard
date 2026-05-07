@@ -1,5 +1,60 @@
 ﻿namespace CoachBoard.Application.DTOs;
 
-public record ExerciseCreateDto(string Name, string Category, int? DefaultSets, int? DefaultReps);
-public record ExerciseUpdateDto(string Name, string Category, int? DefaultSets, int? DefaultReps);
-public record ExerciseReadDto(int Id, string Name, string Category, int? DefaultSets, int? DefaultReps, DateTime CreatedAt);
+public record ExerciseCreateDto(
+    string Name,
+    string Category,
+    int? DefaultSets,
+    int? DefaultReps,
+    string? Description = null,
+    string? Instructions = null,
+    string? VideoUrl = null,
+    string? ReferenceUrl = null,
+    string? DifficultyLevel = null,
+    string? MovementPattern = null,
+    string? Equipment = null,
+    string? TargetMuscleGroup = null,
+    string? SecondaryMuscleGroups = null,
+    string? ExerciseType = null,
+    string? Environment = null,
+    string? Tags = null,
+    bool IsActive = true);
+
+public record ExerciseUpdateDto(
+    string Name,
+    string Category,
+    int? DefaultSets,
+    int? DefaultReps,
+    string? Description = null,
+    string? Instructions = null,
+    string? VideoUrl = null,
+    string? ReferenceUrl = null,
+    string? DifficultyLevel = null,
+    string? MovementPattern = null,
+    string? Equipment = null,
+    string? TargetMuscleGroup = null,
+    string? SecondaryMuscleGroups = null,
+    string? ExerciseType = null,
+    string? Environment = null,
+    string? Tags = null,
+    bool IsActive = true);
+
+public record ExerciseReadDto(
+    int Id,
+    string Name,
+    string Category,
+    int? DefaultSets,
+    int? DefaultReps,
+    string? Description,
+    string? Instructions,
+    string? VideoUrl,
+    string? ReferenceUrl,
+    string? DifficultyLevel,
+    string? MovementPattern,
+    string? Equipment,
+    string? TargetMuscleGroup,
+    string? SecondaryMuscleGroups,
+    string? ExerciseType,
+    string? Environment,
+    string? Tags,
+    bool IsActive,
+    DateTime CreatedAt);
