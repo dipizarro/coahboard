@@ -22,6 +22,9 @@ public class MappingProfile : Profile
             .ForMember(d => d.CreatedAt, m => m.Ignore());
         CreateMap<ClientProgressRecord, ClientProgressReadDto>();
 
+        CreateMap<ClientProgressPhotoCreateDto, ClientProgressPhoto>();
+        CreateMap<ClientProgressPhoto, ClientProgressPhotoReadDto>();
+
         // Exercises
         CreateMap<ExerciseCreateDto, Exercise>();
         CreateMap<ExerciseUpdateDto, Exercise>();

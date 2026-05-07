@@ -19,4 +19,5 @@ public class ClientProgressRecord
     public int? RestingHeartRate { get; set; }
     public string? Notes { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public ICollection<ClientProgressPhoto> Photos { get; set; } = new List<ClientProgressPhoto>();
 }

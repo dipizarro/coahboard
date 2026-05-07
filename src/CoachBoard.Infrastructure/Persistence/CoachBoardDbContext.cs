@@ -16,6 +16,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
     public DbSet<Session> Sessions => Set<Session>();
     public DbSet<ClientProgressRecord> ClientProgressRecords => Set<ClientProgressRecord>();
+    public DbSet<ClientProgressPhoto> ClientProgressPhotos => Set<ClientProgressPhoto>();
     public DbSet<Tenant> Tenants => Set<Tenant>();
     public DbSet<FeatureFlag> FeatureFlags => Set<FeatureFlag>();
     public DbSet<Subscription> Subscriptions => Set<Subscription>();
@@ -114,6 +115,29 @@ public class CoachBoardDbContext : DbContext
                 .OnDelete(DeleteBehavior.Cascade);
 
             e.HasIndex(x => new { x.ClientId, x.RecordedAt });
+        });
+
+        modelBuilder.Entity<ClientProgressPhoto>(e =>
+        {
+            e.ToTable("ClientProgressPhotos");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.PhotoUrl).IsRequired().HasMaxLength(1000);
+            e.Property(x => x.PhotoType).IsRequired().HasMaxLength(30);
+            e.Property(x => x.TakenAt).IsRequired();
+            e.Property(x => x.Notes).HasMaxLength(500);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+
+            e.HasOne(x => x.Client)
+                .WithMany(c => c.ProgressPhotos)
+                .HasForeignKey(x => x.ClientId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasOne(x => x.ClientProgressRecord)
+                .WithMany(r => r.Photos)
+                .HasForeignKey(x => x.ClientProgressRecordId)
+                .OnDelete(DeleteBehavior.NoAction);
+
+            e.HasIndex(x => new { x.ClientId, x.TakenAt });
         });
 
         // Exercise

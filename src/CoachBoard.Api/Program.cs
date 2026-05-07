@@ -4,6 +4,7 @@ using System.IdentityModel.Tokens.Jwt;
 using CoachBoard.Api.Extensions;
 using CoachBoard.Api.Services;
 using CoachBoard.Application.Services;
+using CoachBoard.Application.Models;
 using CoachBoard.API.Middlewares;
 // Repositorios / App
 using CoachBoard.Application.Interfaces;
@@ -13,6 +14,7 @@ using CoachBoard.Application.Validators; // CoachCreateDtoValidator
 using CoachBoard.Infrastructure.Persistence;
 using CoachBoard.Infrastructure.Repositories;
 using CoachBoard.Infrastructure.Payment;
+using CoachBoard.Infrastructure.Storage;
 // FluentValidation
 using FluentValidation;
 using FluentValidation.AspNetCore;
@@ -76,6 +78,8 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientRepository,
                            CoachBoard.Infrastructure.Repositories.ClientRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientProgressRepository,
                            CoachBoard.Infrastructure.Repositories.ClientProgressRepository>();
+builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientProgressPhotoRepository,
+                           CoachBoard.Infrastructure.Repositories.ClientProgressPhotoRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseRepository,
                            CoachBoard.Infrastructure.Repositories.ExerciseRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,
@@ -185,6 +189,8 @@ builder.Services.AddScoped<ICurrentTenant, CurrentTenant>();
 builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
 builder.Services.AddScoped<IFeatureFlags, FeatureFlagsService>();
 builder.Services.AddScoped<IBillingAccessService, BillingAccessService>();
+builder.Services.Configure<FileStorageOptions>(builder.Configuration.GetSection(FileStorageOptions.SectionName));
+builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
 builder.Services.Configure<MercadoPagoOptions>(builder.Configuration.GetSection(MercadoPagoOptions.SectionName));
 builder.Services.AddHttpClient<IMercadoPagoClient, MercadoPagoClient>();
@@ -202,6 +208,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
+app.UseStaticFiles();
 
 app.UseAuthentication(); // <-- importante antes de Authorization
 app.UseAuthorization();

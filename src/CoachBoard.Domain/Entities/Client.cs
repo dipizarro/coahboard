@@ -22,6 +22,7 @@ public class Client : ITenantEntity
     public ICollection<Routine> Routines { get; set; }
     public ICollection<Session> Sessions { get; set; } = new List<Session>();
     public ICollection<ClientProgressRecord> ProgressRecords { get; set; } = new List<ClientProgressRecord>();
+    public ICollection<ClientProgressPhoto> ProgressPhotos { get; set; } = new List<ClientProgressPhoto>();
 
     public int TenantId { get; set; }
     public Tenant? Tenant { get; set; }
