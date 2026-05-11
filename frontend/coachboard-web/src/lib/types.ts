@@ -69,6 +69,16 @@ export type Exercise = {
   createdAt?: string
 }
 
+export type ExerciseMedia = {
+  id: number
+  exerciseId: number
+  mediaType: string
+  url: string
+  title?: string | null
+  description?: string | null
+  createdAt: string
+}
+
 export type RoutineItem = {
   exerciseId: number
   exerciseName?: string

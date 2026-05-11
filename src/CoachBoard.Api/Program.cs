@@ -82,6 +82,8 @@ builder.Services.AddScoped<CoachBoard.Application.Interfaces.IClientProgressPhot
                            CoachBoard.Infrastructure.Repositories.ClientProgressPhotoRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseRepository,
                            CoachBoard.Infrastructure.Repositories.ExerciseRepository>();
+builder.Services.AddScoped<CoachBoard.Application.Interfaces.IExerciseMediaRepository,
+                           CoachBoard.Infrastructure.Repositories.ExerciseMediaRepository>();
 builder.Services.AddScoped<CoachBoard.Application.Interfaces.IRoutineRepository,
                            CoachBoard.Infrastructure.Repositories.RoutineRepository>();
 builder.Services.AddScoped<ISessionRepository, SessionRepository>();

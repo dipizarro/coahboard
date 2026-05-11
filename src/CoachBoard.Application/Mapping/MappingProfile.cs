@@ -29,6 +29,8 @@ public class MappingProfile : Profile
         CreateMap<ExerciseCreateDto, Exercise>();
         CreateMap<ExerciseUpdateDto, Exercise>();
         CreateMap<Exercise, ExerciseReadDto>();
+        CreateMap<ExerciseMediaCreateDto, ExerciseMedia>();
+        CreateMap<ExerciseMedia, ExerciseMediaReadDto>();
 
         // Routines
         CreateMap<RoutineCreateDto, Routine>();

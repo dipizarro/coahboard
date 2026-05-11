@@ -286,6 +286,76 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
         tagsResult!.Items.Should().Contain(x => x.Name == "Curl alterno");
     }
 
+    [Fact]
+    public async Task ExerciseMediaUploadListAndDelete_ForOwnExercise_Succeeds()
+    {
+        var exercise = new Exercise { Name = "Media Own Exercise", Category = "Fuerza", CoachId = 10, IsGlobal = false };
+        Db.Exercises.Add(exercise);
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        var upload = CreateImageMultipart("exercise.jpg");
+        upload.Add(new StringContent("Vista frontal"), "title");
+        upload.Add(new StringContent("Referencia visual"), "description");
+
+        var createResponse = await Client.PostAsync($"/api/exercises/{exercise.Id}/media", upload);
+        createResponse.StatusCode.Should().Be(HttpStatusCode.Created);
+
+        var created = await createResponse.Content.ReadFromJsonAsync<ExerciseMediaReadDto>();
+        created.Should().NotBeNull();
+        created!.ExerciseId.Should().Be(exercise.Id);
+        created.MediaType.Should().Be("Image");
+        created.Url.Should().Contain("/uploads/");
+        created.Title.Should().Be("Vista frontal");
+
+        var listResponse = await Client.GetAsync($"/api/exercises/{exercise.Id}/media");
+        listResponse.StatusCode.Should().Be(HttpStatusCode.OK);
+        var media = await listResponse.Content.ReadFromJsonAsync<List<ExerciseMediaReadDto>>();
+        media.Should().ContainSingle(x => x.Id == created.Id);
+
+        var deleteResponse = await Client.DeleteAsync($"/api/exercises/{exercise.Id}/media/{created.Id}");
+        deleteResponse.StatusCode.Should().Be(HttpStatusCode.NoContent);
+
+        var afterDeleteResponse = await Client.GetAsync($"/api/exercises/{exercise.Id}/media");
+        var afterDelete = await afterDeleteResponse.Content.ReadFromJsonAsync<List<ExerciseMediaReadDto>>();
+        afterDelete.Should().NotContain(x => x.Id == created.Id);
+    }
+
+    [Fact]
+    public async Task ExerciseMediaUpload_WithInvalidExtension_ReturnsBadRequest()
+    {
+        var exercise = new Exercise { Name = "Invalid Media Exercise", Category = "Fuerza", CoachId = 10, IsGlobal = false };
+        Db.Exercises.Add(exercise);
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        var response = await Client.PostAsync($"/api/exercises/{exercise.Id}/media", CreateImageMultipart("exercise.gif"));
+
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+    }
+
+    [Fact]
+    public async Task ExerciseMediaEndpoints_WhenCoachAccessesAnotherCoachExercise_ReturnForbiddenOrNotFound()
+    {
+        var otherExercise = await CreateExerciseForAnotherCoachInTenantAAsync();
+        var media = new ExerciseMedia
+        {
+            ExerciseId = otherExercise.Id,
+            MediaType = "Image",
+            Url = "/uploads/progress/existing.jpg"
+        };
+        Db.ExerciseMedia.Add(media);
+        await Db.SaveChangesAsync();
+
+        await AuthenticateAsUserAAsync();
+
+        (await Client.GetAsync($"/api/exercises/{otherExercise.Id}/media")).StatusCode.Should().Be(HttpStatusCode.NotFound);
+        (await Client.PostAsync($"/api/exercises/{otherExercise.Id}/media", CreateImageMultipart("blocked.jpg"))).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+        (await Client.DeleteAsync($"/api/exercises/{otherExercise.Id}/media/{media.Id}")).StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
     private async Task<Exercise> CreateExerciseForAnotherCoachInTenantAAsync()
     {
         var suffix = Guid.NewGuid().ToString("N");
@@ -310,6 +380,15 @@ public class ExercisesIntegrationTests : BaseIntegrationTest
         await Db.SaveChangesAsync();
 
         return exercise;
+    }
+
+    private static MultipartFormDataContent CreateImageMultipart(string fileName)
+    {
+        var content = new MultipartFormDataContent();
+        var fileContent = new ByteArrayContent([0x01, 0x02, 0x03, 0x04]);
+        fileContent.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue("image/jpeg");
+        content.Add(fileContent, "file", fileName);
+        return content;
     }
 
     private async Task AuthenticateAsAdminInTenantAAsync()

@@ -27,4 +27,5 @@ public class Exercise
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
     public ICollection<RoutineExercise> RoutineExercises { get; set; } = new List<RoutineExercise>();
+    public ICollection<ExerciseMedia> Media { get; set; } = new List<ExerciseMedia>();
 }

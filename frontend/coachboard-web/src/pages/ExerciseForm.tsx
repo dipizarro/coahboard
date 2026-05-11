@@ -2,6 +2,7 @@ import { useEffect, useState, type FormEvent, type ReactNode } from 'react'
 import { create, get, update } from '../api/exercises'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useAuth } from '../auth/useAuth'
+import ExerciseMediaUploader from '../components/ExerciseMediaUploader'
 
 const CATEGORIES = ['Fuerza', 'Cardio', 'Movilidad', 'Flexibilidad', 'General']
 const DIFFICULTIES = ['Inicial', 'Intermedio', 'Avanzado']
@@ -478,6 +479,11 @@ export default function ExerciseForm() {
           />
         </Field>
       </Section>
+
+      <ExerciseMediaUploader
+        exerciseId={id ? Number(id) : null}
+        canManage={role === 'Admin' || (role === 'Coach' && !form.isGlobal)}
+      />
 
       <div className="flex flex-wrap gap-2">
         <button className="btn-primary" type="submit" disabled={loading}>

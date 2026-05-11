@@ -12,6 +12,7 @@ public class CoachBoardDbContext : DbContext
     public DbSet<User> Users => Set<User>();
     public DbSet<Client> Clients => Set<Client>();
     public DbSet<Exercise> Exercises => Set<Exercise>();
+    public DbSet<ExerciseMedia> ExerciseMedia => Set<ExerciseMedia>();
     public DbSet<Routine> Routines => Set<Routine>();
     public DbSet<RoutineExercise> RoutineExercises => Set<RoutineExercise>();
     public DbSet<Session> Sessions => Set<Session>();
@@ -169,6 +170,24 @@ public class CoachBoardDbContext : DbContext
                 .OnDelete(DeleteBehavior.Restrict);
 
             e.HasIndex(x => new { x.IsGlobal, x.CoachId });
+        });
+
+        modelBuilder.Entity<ExerciseMedia>(e =>
+        {
+            e.ToTable("ExerciseMedia");
+            e.HasKey(x => x.Id);
+            e.Property(x => x.MediaType).IsRequired().HasMaxLength(30);
+            e.Property(x => x.Url).IsRequired().HasMaxLength(500);
+            e.Property(x => x.Title).HasMaxLength(150);
+            e.Property(x => x.Description).HasMaxLength(500);
+            e.Property(x => x.CreatedAt).HasDefaultValueSql("SYSUTCDATETIME()");
+
+            e.HasOne(x => x.Exercise)
+                .WithMany(ex => ex.Media)
+                .HasForeignKey(x => x.ExerciseId)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            e.HasIndex(x => new { x.ExerciseId, x.CreatedAt });
         });
 
         // Routine
