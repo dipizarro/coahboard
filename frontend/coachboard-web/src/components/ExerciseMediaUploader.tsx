@@ -3,6 +3,7 @@ import { list, remove, upload } from '../api/exerciseMedia'
 import type { ExerciseMedia } from '../lib/types'
 import EmptyState from './EmptyState'
 import Loader from './Loader'
+import { resolveAssetUrl } from '../lib/assets'
 
 type ExerciseMediaUploaderProps = {
   exerciseId?: number | null
@@ -137,7 +138,11 @@ export default function ExerciseMediaUploader({ exerciseId, canManage }: Exercis
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {media.map(item => (
             <article key={item.id} className="overflow-hidden rounded-lg border border-gray-100 bg-white">
-              <img src={item.url} alt={item.title || 'Imagen del ejercicio'} className="aspect-[4/3] w-full object-cover" />
+              <img
+                src={resolveAssetUrl(item.url)}
+                alt={item.title || 'Imagen del ejercicio'}
+                className="aspect-[4/3] w-full object-cover"
+              />
               <div className="space-y-2 p-3">
                 <div>
                   <h3 className="text-sm font-semibold text-gray-900">{item.title || 'Imagen'}</h3>

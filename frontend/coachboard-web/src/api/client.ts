@@ -2,8 +2,10 @@
 import axios from 'axios'
 import { storage } from '../lib/storage'
 
+export const apiBaseUrl = import.meta.env.VITE_API_URL ?? 'http://localhost:5152'
+
 export const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL ?? 'http://localhost:5152',
+  baseURL: apiBaseUrl,
 })
 
 const STORAGE_TOKEN_KEY = 'coachboard_token' // MISMA que en AuthContext

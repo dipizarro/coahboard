@@ -27,11 +27,14 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
         query = ApplyVisibility(query, includeAll, coachId);
         query = ApplyFilters(query, q, category, targetMuscleGroup, equipment, difficultyLevel, exerciseType, environment, tag);
 
-        return await query
+        var exercises = await query
             .OrderBy(e => e.Name)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync();
+
+        await FillMissingImageUrlsFromMediaAsync(exercises);
+        return exercises;
     }
 
     public async Task<int> CountAsync(
@@ -131,5 +134,35 @@ public class ExerciseRepository : Repository<Exercise>, IExerciseRepository
         }
 
         return query.Where(e => e.IsGlobal);
+    }
+
+    private async Task FillMissingImageUrlsFromMediaAsync(List<Exercise> exercises)
+    {
+        var exerciseIds = exercises
+            .Where(x => string.IsNullOrWhiteSpace(x.ImageUrl))
+            .Select(x => x.Id)
+            .ToList();
+
+        if (exerciseIds.Count == 0) return;
+
+        var media = await _context.ExerciseMedia
+            .AsNoTracking()
+            .Where(x => exerciseIds.Contains(x.ExerciseId))
+            .OrderByDescending(x => x.CreatedAt)
+            .ThenByDescending(x => x.Id)
+            .Select(x => new { x.ExerciseId, x.Url })
+            .ToListAsync();
+
+        var firstMediaByExercise = media
+            .GroupBy(x => x.ExerciseId)
+            .ToDictionary(x => x.Key, x => x.First().Url);
+
+        foreach (var exercise in exercises)
+        {
+            if (firstMediaByExercise.TryGetValue(exercise.Id, out var imageUrl))
+            {
+                exercise.ImageUrl = imageUrl;
+            }
+        }
     }
 }

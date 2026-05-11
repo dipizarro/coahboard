@@ -86,6 +86,11 @@ public class ExerciseMediaController : ControllerBase
         entity.ExerciseId = exerciseId;
 
         await _media.AddAsync(entity);
+        if (string.IsNullOrWhiteSpace(exercise.ImageUrl))
+        {
+            exercise.ImageUrl = url;
+        }
+
         await _media.SaveChangesAsync();
 
         return Created($"/api/exercises/{exerciseId}/media/{entity.Id}", _mapper.Map<ExerciseMediaReadDto>(entity));
@@ -100,6 +105,13 @@ public class ExerciseMediaController : ControllerBase
 
         var entity = await _media.GetByExerciseAndIdAsync(exerciseId, mediaId);
         if (entity is null) return NotFound();
+
+        if (string.Equals(exercise.ImageUrl, entity.Url, StringComparison.OrdinalIgnoreCase))
+        {
+            var replacement = (await _media.GetByExerciseAsync(exerciseId))
+                .FirstOrDefault(x => x.Id != mediaId);
+            exercise.ImageUrl = replacement?.Url;
+        }
 
         await _media.DeleteAsync(entity);
         await _media.SaveChangesAsync();

@@ -21,8 +21,10 @@ using FluentValidation.AspNetCore;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using Serilog;
@@ -192,6 +194,13 @@ builder.Services.AddScoped<IPlanLimitsProvider, PlanLimitsProvider>();
 builder.Services.AddScoped<IFeatureFlags, FeatureFlagsService>();
 builder.Services.AddScoped<IBillingAccessService, BillingAccessService>();
 builder.Services.Configure<FileStorageOptions>(builder.Configuration.GetSection(FileStorageOptions.SectionName));
+builder.Services.PostConfigure<FileStorageOptions>(options =>
+{
+    if (!Path.IsPathRooted(options.RootPath))
+    {
+        options.RootPath = Path.Combine(builder.Environment.ContentRootPath, options.RootPath);
+    }
+});
 builder.Services.AddScoped<IFileStorageService, LocalFileStorageService>();
 
 builder.Services.Configure<MercadoPagoOptions>(builder.Configuration.GetSection(MercadoPagoOptions.SectionName));
@@ -210,7 +219,19 @@ app.UseSwagger();
 app.UseSwaggerUI();
 
 app.UseHttpsRedirection();
-app.UseStaticFiles();
+
+var webRootPath = app.Environment.WebRootPath
+    ?? Path.Combine(app.Environment.ContentRootPath, "wwwroot");
+Directory.CreateDirectory(webRootPath);
+
+var contentTypeProvider = new FileExtensionContentTypeProvider();
+contentTypeProvider.Mappings[".webp"] = "image/webp";
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new PhysicalFileProvider(webRootPath),
+    ContentTypeProvider = contentTypeProvider
+});
 
 app.UseAuthentication(); // <-- importante antes de Authorization
 app.UseAuthorization();

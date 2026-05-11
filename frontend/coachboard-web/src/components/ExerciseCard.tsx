@@ -1,5 +1,6 @@
 import { Link } from 'react-router-dom'
 import type { Exercise } from '../lib/types'
+import { resolveAssetUrl } from '../lib/assets'
 
 type ExerciseCardProps = {
   exercise: Exercise
@@ -58,7 +59,7 @@ export default function ExerciseCard({
     <article className="flex h-full flex-col rounded-lg border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:border-primary-100 hover:shadow-md">
       <div className="mb-4 aspect-[16/9] overflow-hidden rounded-lg bg-gray-100">
         {exercise.imageUrl ? (
-          <img src={exercise.imageUrl} alt={exercise.name} className="h-full w-full object-cover" loading="lazy" />
+          <img src={resolveAssetUrl(exercise.imageUrl)} alt={exercise.name} className="h-full w-full object-cover" loading="lazy" />
         ) : (
           <div className="flex h-full flex-col items-center justify-center gap-2 bg-primary-50 text-primary-700">
             <svg viewBox="0 0 24 24" className="h-10 w-10" fill="none" stroke="currentColor" strokeWidth="1.8">
